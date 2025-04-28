@@ -1,4 +1,6 @@
-package org.appsmith.bio
+package org.appsmith.filmestry
+
+import org.appsmith.filmestry.shared.getPlatform
 
 class Greeting {
     private val platform = getPlatform()

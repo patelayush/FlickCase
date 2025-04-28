@@ -1,4 +1,4 @@
-package org.appsmith.bio
+package org.appsmith.filmestry
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application

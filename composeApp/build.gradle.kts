@@ -13,7 +13,6 @@ plugins {
 
 kotlin {
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -65,6 +64,7 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
+            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
@@ -87,11 +87,11 @@ kotlin {
 }
 
 android {
-    namespace = "org.appsmith.bio"
+    namespace = "org.appsmith.filmestry"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "org.appsmith.bio"
+        applicationId = "org.appsmith.filmestry"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
@@ -114,16 +114,17 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.material3.android)
     debugImplementation(compose.uiTooling)
 }
 
 compose.desktop {
     application {
-        mainClass = "org.appsmith.bio.MainKt"
+        mainClass = "org.appsmith.filmestry.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "org.appsmith.bio"
+            packageName = "org.appsmith.filmestry"
             packageVersion = "1.0.0"
         }
     }

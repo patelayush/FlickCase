@@ -1,4 +1,4 @@
-package org.appsmith.bio
+package org.appsmith.filmestry.shared
 
 interface Platform {
     val name: String

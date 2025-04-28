@@ -1,4 +1,4 @@
-package org.appsmith.bio
+package org.appsmith.filmestry
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

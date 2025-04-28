@@ -1,5 +1,6 @@
-package org.appsmith.bio
+package shared
 
+import org.appsmith.filmestry.shared.Platform
 import platform.UIKit.UIDevice
 
 class IOSPlatform: Platform {

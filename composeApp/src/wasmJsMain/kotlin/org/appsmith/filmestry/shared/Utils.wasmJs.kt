@@ -1,4 +1,4 @@
-package org.appsmith.bio
+package org.appsmith.filmestry.shared
 
 class WasmPlatform: Platform {
     override val name: String = "Web with Kotlin/Wasm"
