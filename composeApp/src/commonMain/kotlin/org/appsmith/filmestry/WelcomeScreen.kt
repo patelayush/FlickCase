@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -16,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -27,12 +29,19 @@ import filmestry.composeapp.generated.resources.Res
 import filmestry.composeapp.generated.resources.app_icon
 import filmestry.composeapp.generated.resources.ic_start
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.appsmith.filmestry.components.AppButton
+import org.appsmith.filmestry.network.MovieApiClient
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun WelcomeScreen(modifier: Modifier = Modifier) {
+fun WelcomeScreen(
+    modifier: Modifier = Modifier,
+    client: MovieApiClient
+) {
     var isTitleVisible by rememberSaveable { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    var isLoading by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         delay(1000)
@@ -41,7 +50,10 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.align(Alignment.Center).animateContentSize(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center)
+                .animateContentSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
@@ -72,10 +84,17 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
                     AppButton(
                         modifier = Modifier
                             .padding(vertical = 30.dp)
-                            .align(Alignment.End),
+                            .align(Alignment.End)
+                            .padding(end = 20.dp),
                         text = "Let's go",
+                        isLoading = isLoading,
                         onClick = {
-                            TODO()
+                            isLoading = true
+                            scope.launch {
+                                client.authenticate().also {
+                                    isLoading = false
+                                }
+                            }
                         },
                         icon = Res.drawable.ic_start
                     )
