@@ -1,6 +1,4 @@
-package shared
-
-import org.appsmith.filmestry.shared.Platform
+package org.appsmith.filmestry.shared
 
 class JVMPlatform: Platform {
     override val name: String = "Java ${System.getProperty("java.version")}"

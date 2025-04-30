@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,11 +57,10 @@ fun WelcomeScreen(
                 .animateContentSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
+            Image(
                 painter = painterResource(Res.drawable.app_icon),
                 modifier = Modifier.size(100.dp),
                 contentDescription = "Logo",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = "Welcome to",

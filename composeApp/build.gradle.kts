@@ -97,7 +97,7 @@ kotlin {
 }
 
 buildkonfig {
-    packageName = "com.appsmith.filmestry"
+    packageName = "org.appsmith.filmestry"
 
     defaultConfigs {
         val apiKey: String = Properties().apply {
