@@ -1,5 +1,6 @@
 package org.appsmith.filmestry.network
 
+import com.appsmith.filmestry.BuildKonfig
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.auth.Auth
@@ -29,10 +30,13 @@ fun createHttpClient(engine: HttpClientEngine): HttpClient {
                 ignoreUnknownKeys = true
             }
         }
-        install(Auth){
+        install(Auth) {
             bearer {
                 loadTokens {
-                    BearerTokens("", "")
+                    BearerTokens(
+                        BuildKonfig.API_KEY,
+                        ""
+                    )
                 }
             }
         }
