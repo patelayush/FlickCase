@@ -1,4 +1,4 @@
-package org.appsmith.filmestry
+package org.appsmith.filmestry.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +22,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -31,18 +31,20 @@ import filmestry.composeapp.generated.resources.app_icon
 import filmestry.composeapp.generated.resources.ic_start
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.appsmith.filmestry.APP_NAME
+import org.appsmith.filmestry.Screen
 import org.appsmith.filmestry.components.AppButton
 import org.appsmith.filmestry.network.MovieApiClient
+import org.appsmith.filmestry.viewmodel.HomeViewModel
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun WelcomeScreen(
     modifier: Modifier = Modifier,
-    client: MovieApiClient
+    client: MovieApiClient,
+    homeViewModel: HomeViewModel
 ) {
     var isTitleVisible by rememberSaveable { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    var isLoading by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         delay(1000)
@@ -73,9 +75,11 @@ fun WelcomeScreen(
                 visible = isTitleVisible,
                 enter = fadeIn(tween(durationMillis = 500))
             ) {
-                Column {
+                Column(Modifier.fillMaxWidth()) {
                     Text(
-                        text = "Filmestry",
+                        text = APP_NAME,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
                         letterSpacing = 1.8.sp,
                         color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.displayLarge
@@ -85,16 +89,11 @@ fun WelcomeScreen(
                         modifier = Modifier
                             .padding(vertical = 30.dp)
                             .align(Alignment.End)
-                            .padding(end = 20.dp),
+                            .padding(end = 30.dp),
                         text = "Let's go",
-                        isLoading = isLoading,
+                        isLoading = homeViewModel.isLoading.value,
                         onClick = {
-                            isLoading = true
-                            scope.launch {
-                                client.authenticate().also {
-                                    isLoading = false
-                                }
-                            }
+                            homeViewModel.authenticate()
                         },
                         icon = Res.drawable.ic_start
                     )
