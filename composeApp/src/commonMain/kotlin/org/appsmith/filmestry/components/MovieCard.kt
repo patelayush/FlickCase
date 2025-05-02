@@ -1,5 +1,6 @@
 package org.appsmith.filmestry.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.CardDefaults
@@ -58,13 +60,13 @@ fun MovieCard(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(150.dp),
+                        .height(200.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
-                        model = configuration?.images?.base_url + "original" + movie?.backdrop_path,
+                        model = "${configuration?.images?.secure_base_url}original${movie?.poster_path}",
                         contentDescription = "",
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.FillBounds,
                         filterQuality = FilterQuality.High,
                         onLoading = {
                             isLoading = true
@@ -77,7 +79,7 @@ fun MovieCard(
                             println(it.result.throwable.message)
                         },
                         modifier = Modifier.fillMaxSize()
-                            .clip(shape = RoundedCornerShape(15.dp))
+                            .clip(shape = RoundedCornerShape(15.dp)),
                     )
                     if (isLoading) {
                         CircularProgressIndicator(
@@ -86,28 +88,18 @@ fun MovieCard(
                             modifier = Modifier.size(20.dp)
                         )
                     }
-                }
-
-                Row(
-                    Modifier
-                        .padding(horizontal = 10.dp, vertical = 10.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = movie?.title ?: "",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onTertiary,
-                        modifier = Modifier.weight(1f)
-                    )
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(3.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        horizontalArrangement = Arrangement.spacedBy(1.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .wrapContentWidth()
+                            .background(MaterialTheme.colorScheme.tertiaryContainer)
+                            .padding(horizontal = 5.dp, vertical = 3.dp)
                     ) {
                         Text(
                             text = movie?.vote_average?.round(1)?.toString() ?: "",
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onTertiary,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -115,11 +107,46 @@ fun MovieCard(
                             painter = painterResource(Res.drawable.ic_star_filled),
                             contentDescription = "star_icon",
                             modifier = Modifier.offset(2.dp)
-                                .size(MaterialTheme.typography.bodyLarge.fontSize.value.dp),
+                                .size(MaterialTheme.typography.bodySmall.fontSize.value.dp),
                             tint = MaterialTheme.colorScheme.onTertiary
                         )
                     }
                 }
+                /*
+
+                                Row(
+                                    Modifier
+                                        .padding(horizontal = 10.dp, vertical = 10.dp)
+                                        .fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = movie?.title ?: "",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onTertiary,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(3.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = movie?.vote_average?.round(1)?.toString() ?: "",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.onTertiary,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        Icon(
+                                            painter = painterResource(Res.drawable.ic_star_filled),
+                                            contentDescription = "star_icon",
+                                            modifier = Modifier.offset(2.dp)
+                                                .size(MaterialTheme.typography.bodyLarge.fontSize.value.dp),
+                                            tint = MaterialTheme.colorScheme.onTertiary
+                                        )
+                                    }
+                                }
+                */
 
             }
         }

@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,6 +38,7 @@ import org.appsmith.filmestry.APP_NAME
 import org.appsmith.filmestry.components.MovieCard
 import org.appsmith.filmestry.components.RegionPicker
 import org.appsmith.filmestry.model.configuration.ConfigurationResponse
+import org.appsmith.filmestry.model.movies.Movie
 import org.appsmith.filmestry.model.movies.MoviesByGenre
 import org.appsmith.filmestry.model.movies.MoviesResponse
 import org.appsmith.filmestry.model.nowplayingmovies.NowPlayingMoviesResponse
@@ -114,6 +116,18 @@ fun HomeScreenContent(
     moviesByGenre: List<MoviesByGenre>,
     showRegionPicker: () -> Unit = {}
 ) {
+
+    val categories: List<Pair<String, List<Movie?>>> = remember {
+        mutableListOf(
+            Pair("Trending Movies", trendingMovies?.results ?: listOf()),
+            Pair("In Theatres", nowPlayingMovies?.results ?: listOf()),
+        ).apply {
+            moviesByGenre.forEach {
+                add(Pair(("Popular ${it.genre.name}"), it.movies ?: listOf()))
+            }
+        }
+    }
+
     Column {
         if (getPlatform().name.contains("web", true)) {
             Row(
@@ -146,73 +160,9 @@ fun HomeScreenContent(
                 .animateContentSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = "Trending Movies",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        top = 30.dp,
-                        start = 20.dp
-                    ),
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-
-            LazyRow(Modifier.padding(top = 10.dp)) {
-                itemsIndexed(
-                    trendingMovies?.results ?: listOf()
-                ) { index, movie ->
-                    MovieCard(
-                        modifier = Modifier
-                            .padding(
-                                start = 20.dp,
-                                end = if (index == trendingMovies?.results?.lastIndex) 20.dp else 0.dp
-                            )
-                            .width(250.dp),
-                        movie = movie,
-                        configuration = configuration,
-                        onCardClick = {
-
-                        }
-                    )
-                }
-            }
-
-            Text(
-                text = "In Theatres",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        top = 30.dp,
-                        start = 20.dp
-                    ),
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-
-            LazyRow(Modifier.padding(top = 10.dp)) {
-                itemsIndexed(
-                    nowPlayingMovies?.results ?: listOf()
-                ) { index, movie ->
-                    MovieCard(
-                        modifier = Modifier
-                            .padding(
-                                start = 20.dp,
-                                end = if (index == nowPlayingMovies?.results?.lastIndex) 20.dp else 0.dp
-                            )
-                            .width(250.dp),
-                        movie = movie,
-                        configuration = configuration,
-                        onCardClick = {
-
-                        }
-                    )
-                }
-            }
-
-            moviesByGenre.forEach {
+            categories.forEach { categories ->
                 Text(
-                    text = "Popular ${it.genre.name} Movies",
+                    text = categories.first,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
@@ -223,17 +173,20 @@ fun HomeScreenContent(
                     color = MaterialTheme.colorScheme.onBackground,
                 )
 
-                LazyRow(Modifier.padding(top = 10.dp)) {
+                LazyRow(
+                    Modifier.padding(top = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
                     itemsIndexed(
-                        it.movies ?: listOf()
+                        categories.second
                     ) { index, movie ->
                         MovieCard(
                             modifier = Modifier
                                 .padding(
-                                    start = 20.dp,
-                                    end = if (index == it.movies?.lastIndex) 20.dp else 0.dp
+                                    start = if(index == 0 ) 20.dp else 0.dp,
+                                    end = if (index == trendingMovies?.results?.lastIndex) 20.dp else 0.dp
                                 )
-                                .width(250.dp),
+                                .width(180.dp),
                             movie = movie,
                             configuration = configuration,
                             onCardClick = {
