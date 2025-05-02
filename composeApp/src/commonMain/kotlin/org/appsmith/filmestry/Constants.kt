@@ -3,6 +3,10 @@ package org.appsmith.filmestry
 const val APP_NAME = "Filmestry"
 const val tmdbApiHost = "https://api.themoviedb.org/3"
 
+//local prefs key
+const val sessionCountKey = "sessionCount"
+const val regionKey = "region"
+
 enum class ERROR_MSG(val msg: String) {
     EMPTY_RESPONSE("Empty Response"),
     UNKNOWN("Unknown Error"),

@@ -8,6 +8,7 @@ import org.appsmith.filmestry.model.authentication.AuthenticationResponse
 import org.appsmith.filmestry.model.configuration.ConfigurationResponse
 import org.appsmith.filmestry.model.configuration.Countries
 import org.appsmith.filmestry.model.genre.GenresResponse
+import org.appsmith.filmestry.model.moviedetails.MovieDetailsResponse
 import org.appsmith.filmestry.model.nowplayingmovies.NowPlayingMoviesResponse
 import org.appsmith.filmestry.model.movies.MoviesResponse
 import org.appsmith.filmestry.network.util.NetworkError
@@ -99,6 +100,44 @@ class MovieApiClient(
         return try {
             val response = httpClient.get("$tmdbApiHost/discover/movie?include_adult=false&include_video=false&region=$region&language=$language&with_origin_country=$region&page=1&sort_by=vote_count.desc&with_genres=$genreId")
             result<MoviesResponse?>(response)
+        } catch (e: Exception) {
+            checkForError(e)
+        }
+    }
+
+    suspend fun searchMoviesByMutlipleGenres(
+        language: String = "en-US",
+        region: String = "US",
+        genres: List<Int>
+    ): Result<MoviesResponse?, NetworkError> {
+        val genreString = genres.joinToString(",")
+        return try {
+            val response = httpClient.get("$tmdbApiHost/discover/movie?include_adult=false&include_video=false&region=$region&language=$language&with_origin_country=$region&page=1&sort_by=vote_count.desc&with_genres=$genreString")
+            result<MoviesResponse?>(response)
+        } catch (e: Exception) {
+            checkForError(e)
+        }
+    }
+
+    suspend fun searchMovie(
+        language: String = "en-US",
+        region: String = "US",
+        query: String
+    ): Result<MoviesResponse?, NetworkError> {
+        return try {
+            val response = httpClient.get("$tmdbApiHost/search/movie?query=$query&include_adult=false&include_video=false&region=$region&language=$language&with_origin_country=$region&page=1&sort_by=vote_count.desc")
+            result<MoviesResponse?>(response)
+        } catch (e: Exception) {
+            checkForError(e)
+        }
+    }
+
+    suspend fun getMovieDetails(
+        movieId: Int?
+    ): Result<MovieDetailsResponse?, NetworkError> {
+        return try {
+            val response = httpClient.get("$tmdbApiHost/movie/$movieId")
+            result<MovieDetailsResponse?>(response)
         } catch (e: Exception) {
             checkForError(e)
         }

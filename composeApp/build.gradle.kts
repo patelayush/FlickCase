@@ -63,6 +63,9 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.kotlinx.coroutines.android)
+            implementation(libs.androidx.splashscreen)
+            implementation(libs.datastore.preferences)
+            implementation(libs.datastore)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -77,6 +80,7 @@ kotlin {
             implementation(libs.coil.compose)
             implementation(libs.coil.ktor)
             implementation(libs.androidx.viewmodel.compose)
+            implementation(libs.russhwolf.mutiplatform.settings)
 
             //ktor
             implementation(libs.ktor.client.core)
@@ -88,11 +92,15 @@ kotlin {
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
-            implementation(libs.ktor.client.java)
+            implementation(libs.ktor.client.okhttp)
             implementation(libs.kotlinx.coroutines.swing)
+            implementation(libs.datastore.preferences)
+            implementation(libs.datastore)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            implementation(libs.datastore.preferences)
+            implementation(libs.datastore)
         }
         wasmJsMain.dependencies {
             implementation(libs.ktor.client.js)

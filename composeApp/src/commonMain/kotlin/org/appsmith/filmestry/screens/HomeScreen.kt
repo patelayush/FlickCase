@@ -75,20 +75,14 @@ fun HomeScreen(
                 configuration = homeViewModel.configuration.value,
                 nowPlayingMovies = homeViewModel.nowPlayingMovies.value,
                 moviesByGenre = homeViewModel.moviesByGenre.value,
+                showMovieLoader = homeViewModel.isLoading.value,
                 showRegionPicker = {
                     showRegionSelector = true
+                },
+                onMovieClicked = {
+                    homeViewModel.getMovieDetails(it)
                 }
             )
-        }
-
-        if (!getPlatform().name.contains("web", true)) {
-            RangePickerIcon(
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(end = 10.dp, top = 10.dp)
-            ) {
-                showRegionSelector = true
-            }
         }
 
         RegionPicker(
@@ -99,8 +93,7 @@ fun HomeScreen(
                 showRegionSelector = false
             },
             onRegionSelected = {
-                homeViewModel.selectedRegion.value = it
-                homeViewModel.refresh()
+                homeViewModel.setSelectedRegion(it)
                 showRegionSelector = false
             }
         )
@@ -114,7 +107,9 @@ fun HomeScreenContent(
     configuration: ConfigurationResponse?,
     nowPlayingMovies: NowPlayingMoviesResponse?,
     moviesByGenre: List<MoviesByGenre>,
-    showRegionPicker: () -> Unit = {}
+    showMovieLoader:Boolean,
+    showRegionPicker: () -> Unit = {},
+    onMovieClicked: (Int?) -> Unit
 ) {
 
     val categories: List<Pair<String, List<Movie?>>> = remember {
@@ -129,29 +124,27 @@ fun HomeScreenContent(
     }
 
     Column {
-        if (getPlatform().name.contains("web", true)) {
-            Row(
-                modifier = Modifier.fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(vertical = 10.dp, horizontal = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(verticalAlignment = Alignment.Bottom) {
-                    Image(
-                        painter = painterResource(Res.drawable.app_icon),
-                        contentDescription = "icon",
-                        modifier = Modifier.size(50.dp)
-                    )
-                    Text(
-                        text = APP_NAME,
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-                RangePickerIcon {
-                    showRegionPicker()
-                }
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(vertical = 10.dp, horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.Bottom) {
+                Image(
+                    painter = painterResource(Res.drawable.app_icon),
+                    contentDescription = "icon",
+                    modifier = Modifier.size(50.dp)
+                )
+                Text(
+                    text = APP_NAME,
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            RangePickerIcon {
+                showRegionPicker()
             }
         }
         Column(
@@ -160,7 +153,7 @@ fun HomeScreenContent(
                 .animateContentSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            categories.forEach { categories ->
+            categories.filter { it.second.isNotEmpty() }.forEach { categories ->
                 Text(
                     text = categories.first,
                     modifier = Modifier
@@ -183,14 +176,15 @@ fun HomeScreenContent(
                         MovieCard(
                             modifier = Modifier
                                 .padding(
-                                    start = if(index == 0 ) 20.dp else 0.dp,
+                                    start = if (index == 0) 20.dp else 0.dp,
                                     end = if (index == trendingMovies?.results?.lastIndex) 20.dp else 0.dp
                                 )
-                                .width(180.dp),
+                                .width(160.dp),
                             movie = movie,
+                            showImageLoader = showMovieLoader,
                             configuration = configuration,
                             onCardClick = {
-
+                                onMovieClicked(it)
                             }
                         )
                     }

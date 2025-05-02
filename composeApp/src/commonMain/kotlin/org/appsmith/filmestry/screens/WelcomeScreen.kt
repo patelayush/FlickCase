@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.russhwolf.settings.Settings
 import filmestry.composeapp.generated.resources.Res
 import filmestry.composeapp.generated.resources.app_icon
 import filmestry.composeapp.generated.resources.ic_start
@@ -41,7 +42,6 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun WelcomeScreen(
     modifier: Modifier = Modifier,
-    client: MovieApiClient,
     homeViewModel: HomeViewModel
 ) {
     var isTitleVisible by rememberSaveable { mutableStateOf(false) }
@@ -102,4 +102,5 @@ fun WelcomeScreen(
         }
     }
 }
+
 

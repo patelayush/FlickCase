@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -43,17 +44,20 @@ import org.jetbrains.compose.resources.painterResource
 fun MovieCard(
     modifier: Modifier,
     movie: Movie?,
+    showImageLoader: Boolean = false,
     configuration: ConfigurationResponse?,
-    onCardClick: () -> Unit
+    onCardClick: (Int?) -> Unit
 ) {
     var isLoading by remember { mutableStateOf(false) }
     ElevatedCard(
         modifier = modifier,
         shape = RoundedCornerShape(15.dp),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer
+            containerColor = if(isLoading) MaterialTheme.colorScheme.tertiaryContainer else Color.Transparent,
         ),
-        onClick = onCardClick,
+        onClick = {
+            onCardClick(movie?.id)
+        },
         elevation = CardDefaults.elevatedCardElevation(5.dp),
         content = {
             Column {
@@ -81,7 +85,7 @@ fun MovieCard(
                         modifier = Modifier.fillMaxSize()
                             .clip(shape = RoundedCornerShape(15.dp)),
                     )
-                    if (isLoading) {
+                    if (isLoading || showImageLoader) {
                         CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.onTertiary,
                             strokeWidth = 5.dp,
@@ -101,7 +105,7 @@ fun MovieCard(
                             text = movie?.vote_average?.round(1)?.toString() ?: "",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onTertiary,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.Bold
                         )
                         Icon(
                             painter = painterResource(Res.drawable.ic_star_filled),

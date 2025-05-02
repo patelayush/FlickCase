@@ -1,35 +1,47 @@
 package org.appsmith.filmestry.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.russhwolf.settings.Settings
 import kotlinx.coroutines.launch
 import org.appsmith.filmestry.ERROR_MSG
 import org.appsmith.filmestry.Screen
 import org.appsmith.filmestry.model.configuration.ConfigurationResponse
 import org.appsmith.filmestry.model.genre.Genre
+import org.appsmith.filmestry.model.moviedetails.MovieDetailsResponse
+import org.appsmith.filmestry.model.movies.Movie
 import org.appsmith.filmestry.model.movies.MoviesByGenre
-import org.appsmith.filmestry.model.nowplayingmovies.NowPlayingMoviesResponse
 import org.appsmith.filmestry.model.movies.MoviesResponse
+import org.appsmith.filmestry.model.nowplayingmovies.NowPlayingMoviesResponse
 import org.appsmith.filmestry.network.MovieApiClient
 import org.appsmith.filmestry.network.util.onError
 import org.appsmith.filmestry.network.util.onSuccess
+import org.appsmith.filmestry.regionKey
+import org.appsmith.filmestry.sessionCountKey
 
 class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
 
-    var selectedRegion = mutableStateOf(Locale.current.region)
+    val settings = Settings()
+    var selectedRegion = mutableStateOf(getSavedRegion())
 
-    val currentScreen = mutableStateOf(Screen.Welcome)
+    val currentScreen = mutableStateOf(if (hasSeenWelcomeScreen()) Screen.Home else Screen.Welcome)
     val errorMessage = mutableStateOf("")
     val isLoading = mutableStateOf(false)
+    val isMovieDetailsLoading = mutableStateOf(false)
 
     val nowPlayingMovies = mutableStateOf<NowPlayingMoviesResponse?>(null)
     val trendingMovies = mutableStateOf<MoviesResponse?>(null)
     val configuration = mutableStateOf<ConfigurationResponse?>(null)
     val countries = mutableStateOf<List<String>?>(null)
     val movieGenres = mutableStateOf<List<Genre>?>(null)
+    val selectedMovieGenres = mutableStateOf(mutableListOf<Genre>())
     val moviesByGenre = mutableStateOf(mutableListOf<MoviesByGenre>())
+    val moviesByMultipleGenre = mutableStateOf(listOf<Movie?>())
+    val searchedMovies = mutableStateOf<MoviesResponse?>(null)
+    val movieDetails = mutableStateOf<MovieDetailsResponse?>(null)
 
     val popularGenres = listOf(
         "Action",
@@ -84,8 +96,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
                 } ?: run {
                     errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
                 }
-            }
-            .onError {
+            }.onError {
                 errorMessage.value = ERROR_MSG.API_ERROR.msg
             }
     }
@@ -98,8 +109,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
                 } ?: run {
                     errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
                 }
-            }
-            .onError {
+            }.onError {
                 errorMessage.value = ERROR_MSG.API_ERROR.msg
             }
     }
@@ -112,8 +122,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
                 } ?: run {
                     errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
                 }
-            }
-            .onError {
+            }.onError {
                 errorMessage.value = ERROR_MSG.API_ERROR.msg
             }
     }
@@ -126,8 +135,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
                 } ?: run {
                     errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
                 }
-            }
-            .onError {
+            }.onError {
                 errorMessage.value = ERROR_MSG.API_ERROR.msg
             }
     }
@@ -141,8 +149,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
                 } ?: run {
                     errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
                 }
-            }
-            .onError {
+            }.onError {
                 errorMessage.value = ERROR_MSG.API_ERROR.msg
             }
     }
@@ -155,8 +162,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
                 } ?: run {
                     errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
                 }
-            }
-            .onError {
+            }.onError {
                 errorMessage.value = ERROR_MSG.API_ERROR.msg
             }
     }
@@ -174,15 +180,93 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
                 } ?: run {
                     errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
                 }
-            }
-            .onError {
+            }.onError {
                 errorMessage.value = ERROR_MSG.API_ERROR.msg
             }
     }
 
+    fun getMoviesByMultipleGenres() {
+        viewModelScope.launch {
+            client.searchMoviesByMutlipleGenres(
+                genres = selectedMovieGenres.value?.map { it.id ?: 0 } ?: listOf(), region = selectedRegion.value
+            )
+                .onSuccess { response ->
+                    response?.let {
+                        moviesByMultipleGenre.value = response.results ?: listOf()
+                    } ?: run {
+                        errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
+                    }
+                }.onError {
+                    errorMessage.value = ERROR_MSG.API_ERROR.msg
+                }
+        }
+    }
+
+    fun searchMovie(query: String) {
+        viewModelScope.launch {
+            searchedMovies.value = null
+            isLoading.value = true
+            client.searchMovie(query = query, region = selectedRegion.value)
+                .onSuccess { response ->
+                    response?.let {
+                        searchedMovies.value = it
+                    } ?: run {
+                        errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
+                    }
+                }.onError {
+                    errorMessage.value = ERROR_MSG.API_ERROR.msg
+                }
+        }.invokeOnCompletion {
+            isLoading.value = false
+        }
+    }
+
+    fun getMovieDetails(movieId: Int?) {
+        viewModelScope.launch {
+            movieDetails.value = null
+            isMovieDetailsLoading.value = true
+            movieId?.let {
+                client.getMovieDetails(movieId = it)
+                    .onSuccess { response ->
+                        response?.let {
+                            movieDetails.value = it
+                        } ?: run {
+                            errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
+                        }
+                    }.onError {
+                        errorMessage.value = ERROR_MSG.API_ERROR.msg
+                    }
+            }
+        }.invokeOnCompletion {
+            isMovieDetailsLoading.value = false
+        }
+    }
+
+    private fun hasSeenWelcomeScreen(): Boolean {
+        if (!settings.hasKey(sessionCountKey)) {
+            settings.putInt(sessionCountKey, 0)
+            return false
+        } else {
+            settings.putInt(sessionCountKey, settings.getInt(sessionCountKey, 0) + 1)
+            return true
+        }
+    }
+
+    fun setSelectedRegion(region: String) {
+        selectedRegion.value = region
+        settings.putString(regionKey, region)
+        refresh()
+
+    }
+
+    private fun getSavedRegion(): String {
+        return settings.getStringOrNull(regionKey) ?: Locale.current.region
+    }
+
     suspend fun getFilteredMovieGenres() {
         moviesByGenre.value.clear()
-        val popularGenres = movieGenres.value?.filter { popularGenres.contains(it.name) } ?: listOf()
+        val popularGenres =
+            movieGenres.value?.filter { popularGenres.contains(it.name) } ?: listOf()
         popularGenres.forEach {
             getMoviesByGenre(it)
         }

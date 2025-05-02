@@ -26,12 +26,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import org.appsmith.filmestry.components.BottomNavigationBar
+import org.appsmith.filmestry.components.MovieDetails
 import org.appsmith.filmestry.network.MovieApiClient
 import org.appsmith.filmestry.screens.GenresScreen
 import org.appsmith.filmestry.screens.HomeScreen
 import org.appsmith.filmestry.screens.SearchScreen
 import org.appsmith.filmestry.screens.WelcomeScreen
-import org.appsmith.filmestry.theme.AppTheme
+import org.appsmith.filmestry.theme.AlwaysDarkTheme
 import org.appsmith.filmestry.viewmodel.HomeViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -39,13 +40,12 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun App(
     client: MovieApiClient,
-    homeViewModel: HomeViewModel = viewModel { HomeViewModel(client) }
+    homeViewModel: HomeViewModel = viewModel { HomeViewModel(client) },
 ) {
-
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    AppTheme {
+    AlwaysDarkTheme {
         Scaffold(
             modifier = Modifier
                 .animateContentSize(tween())
@@ -96,7 +96,6 @@ fun App(
                 when (homeViewModel.currentScreen.value) {
                     Screen.Welcome -> {
                         WelcomeScreen(
-                            client = client,
                             homeViewModel = homeViewModel
                         )
                     }
@@ -122,6 +121,15 @@ fun App(
                     }
                 }
             }
+
+            MovieDetails(
+                showDialog = homeViewModel.movieDetails.value != null,
+                movie = homeViewModel.movieDetails.value,
+                configuration = homeViewModel.configuration.value,
+                onDismiss = {
+                    homeViewModel.movieDetails.value = null
+                }
+            )
             if (homeViewModel.errorMessage.value.isNotBlank()) {
                 scope.launch {
                     snackbarHostState.showSnackbar(
@@ -131,6 +139,8 @@ fun App(
                     homeViewModel.errorMessage.value = ""
                 }
             }
+
+
         }
     }
 }

@@ -249,7 +249,7 @@ val unspecified_scheme = ColorFamily(
 )
 
 @Composable
-fun AppTheme(
+fun AppDynamicTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
@@ -260,6 +260,20 @@ fun AppTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
+        typography = AppTypography(),
+        content = content
+    )
+}
+
+
+@Composable
+fun AlwaysDarkTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+
+    MaterialTheme(
+        colorScheme = highContrastDarkColorScheme,
         typography = AppTypography(),
         content = content
     )

@@ -1,58 +1,150 @@
 package org.appsmith.filmestry.screens
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
-import filmestry.composeapp.generated.resources.Res
-import filmestry.composeapp.generated.resources.app_icon
-import filmestry.composeapp.generated.resources.ic_start
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import org.appsmith.filmestry.APP_NAME
-import org.appsmith.filmestry.Screen
-import org.appsmith.filmestry.components.AppButton
+import org.appsmith.filmestry.components.FilmestrySearchBar
+import org.appsmith.filmestry.components.MovieCard
 import org.appsmith.filmestry.network.MovieApiClient
 import org.appsmith.filmestry.viewmodel.HomeViewModel
-import org.jetbrains.compose.resources.painterResource
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SearchScreen(
     modifier: Modifier = Modifier,
     client: MovieApiClient,
     homeViewModel: HomeViewModel
 ) {
+    var searchQuery by remember { mutableStateOf("") }
+    var onTyping by remember { mutableStateOf(false) }
+
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
+                .padding(top = 30.dp)
+                .padding(horizontal = 20.dp)
                 .fillMaxWidth()
-                .align(Alignment.Center)
                 .animateContentSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Search")
+            FilmestrySearchBar(
+                query = searchQuery,
+                onQueryChange = { newQuery ->
+                    searchQuery = newQuery
+                    onTyping = true
+                },
+                onSearch = { query ->
+                    homeViewModel.searchMovie(query)
+                    onTyping = false
+                }
+            )
+            if (!homeViewModel.searchedMovies.value?.results.isNullOrEmpty() && searchQuery.isNotBlank() && !onTyping) {
+                Column(
+                    Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(vertical = 20.dp)
+                ) {
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                SpanStyle(
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            ) {
+                                append("Results for ")
+                            }
+                            withStyle(
+                                SpanStyle(
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                )
+                            ) {
+                                append(searchQuery)
+                            }
+                        },
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                    FlowRow(
+                        modifier = Modifier.padding(top = 20.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(15.dp)
+                    ) {
+                        homeViewModel.searchedMovies.value?.results?.forEach {
+                            MovieCard(
+                                modifier = Modifier
+                                    .width(180.dp),
+                                movie = it,
+                                configuration = homeViewModel.configuration.value,
+                                showImageLoader = homeViewModel.isMovieDetailsLoading.value,
+                                onCardClick = {
+                                    homeViewModel.getMovieDetails(it)
+                                }
+                            )
+                        }
+                    }
+                }
+            } else if (homeViewModel.searchedMovies.value?.results?.isEmpty() == true && searchQuery.isNotBlank()) {
+                Column(
+                    Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(vertical = 20.dp)
+                ) {
+                    if (!onTyping) {
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(
+                                    SpanStyle(
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                ) {
+                                    append("No results found for ")
+                                }
+                                withStyle(
+                                    SpanStyle(
+                                        color = MaterialTheme.colorScheme.tertiary,
+                                    )
+                                ) {
+                                    append(searchQuery)
+                                }
+                            },
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    }
+                }
+            }
+        }
+        if (homeViewModel.isLoading.value) {
+            Box(Modifier.fillMaxSize()) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.tertiary,
+                    strokeWidth = 5.dp,
+                    modifier = Modifier.align(Alignment.Center).size(50.dp)
+                )
+            }
         }
     }
 }
