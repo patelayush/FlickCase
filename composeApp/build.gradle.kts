@@ -75,6 +75,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.coil.compose)
+            implementation(libs.coil.ktor)
             implementation(libs.androidx.viewmodel.compose)
 
             //ktor
@@ -87,6 +88,7 @@ kotlin {
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
+            implementation(libs.ktor.client.java)
             implementation(libs.kotlinx.coroutines.swing)
         }
         iosMain.dependencies {

@@ -254,8 +254,8 @@ fun AppTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        darkTheme -> darkScheme
-        else -> lightScheme
+        darkTheme -> mediumContrastDarkColorScheme
+        else -> mediumContrastLightColorScheme
     }
 
     MaterialTheme(

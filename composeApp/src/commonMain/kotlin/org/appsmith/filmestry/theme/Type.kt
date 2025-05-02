@@ -4,6 +4,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import filmestry.composeapp.generated.resources.Res
 import filmestry.composeapp.generated.resources.dm_serif
 import filmestry.composeapp.generated.resources.nunito_sans
@@ -27,15 +28,15 @@ fun AppTypography() = Typography().run {
     val dmSerifFamily = DMSerifFamily()
 
     copy(
-        displayLarge = displayLarge.copy(fontFamily = dmSerifFamily),
-        displayMedium = displayMedium.copy(fontFamily = dmSerifFamily),
-        displaySmall = displaySmall.copy(fontFamily = dmSerifFamily),
-        headlineLarge = headlineLarge.copy(fontFamily = dmSerifFamily),
-        headlineMedium = headlineMedium.copy(fontFamily = dmSerifFamily),
-        headlineSmall = headlineSmall.copy(fontFamily = dmSerifFamily),
-        titleLarge = titleLarge.copy(fontFamily = dmSerifFamily),
-        titleMedium = titleMedium.copy(fontFamily = dmSerifFamily),
-        titleSmall = titleSmall.copy(fontFamily = dmSerifFamily),
+        displayLarge = displayLarge.copy(fontFamily = dmSerifFamily, letterSpacing = 1.5.sp),
+        displayMedium = displayMedium.copy(fontFamily = dmSerifFamily, letterSpacing = 1.5.sp),
+        displaySmall = displaySmall.copy(fontFamily = dmSerifFamily, letterSpacing = 1.5.sp),
+        headlineLarge = headlineLarge.copy(fontFamily = dmSerifFamily, letterSpacing = 1.5.sp),
+        headlineMedium = headlineMedium.copy(fontFamily = dmSerifFamily, letterSpacing = 1.5.sp),
+        headlineSmall = headlineSmall.copy(fontFamily = dmSerifFamily, letterSpacing = 1.5.sp),
+        titleLarge = titleLarge.copy(fontFamily = dmSerifFamily, letterSpacing = 1.5.sp),
+        titleMedium = titleMedium.copy(fontFamily = dmSerifFamily, letterSpacing = 1.5.sp),
+        titleSmall = titleSmall.copy(fontFamily = dmSerifFamily, letterSpacing = 1.5.sp),
         bodyLarge = bodyLarge.copy(fontFamily = nunitoSansFamily),
         bodyMedium = bodyMedium.copy(fontFamily = nunitoSansFamily),
         bodySmall = bodySmall.copy(fontFamily = nunitoSansFamily),
