@@ -24,9 +24,9 @@ platform :android do
 
   desc "Copy files from one directory to another"
   lane :copy do
-    dest = '/Users/patel/Documents/Github/Filmestry/docs'
-    src = '/Users/patel/Documents/Github/Filmestry/composeApp/build/dist/wasmJs/productionExecutable'
-    srcPolicy = '/Users/patel/Documents/Github/Filmestry/PrivacyPolicy.html'
+    dest = '/Users/patel/Documents/Github/FlickCase/docs'
+    src = '/Users/patel/Documents/Github/FlickCase/composeApp/build/dist/wasmJs/productionExecutable'
+    srcPolicy = '/Users/patel/Documents/Github/FlickCase/PrivacyPolicy.html'
 
     # Ensure destination directory exists
     FileUtils.mkdir_p(dest)

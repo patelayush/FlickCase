@@ -109,7 +109,7 @@ kotlin {
 }
 
 buildkonfig {
-    packageName = "org.appsmith.filmestry"
+    packageName = "org.appsmith.flickcase"
 
     defaultConfigs {
         val apiKey: String = Properties().apply {
@@ -126,11 +126,11 @@ keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 
 
 android {
-    namespace = "org.appsmith.filmestry"
+    namespace = "org.appsmith.flickcase"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "org.appsmith.filmestry"
+        applicationId = "org.appsmith.flickcase"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
@@ -168,11 +168,11 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "org.appsmith.filmestry.MainKt"
+        mainClass = "org.appsmith.flickcase.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "org.appsmith.filmestry"
+            packageName = "org.appsmith.flickcase"
             packageVersion = "1.0.0"
         }
     }
