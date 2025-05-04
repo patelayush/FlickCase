@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -49,7 +50,7 @@ fun MovieCard(
     onCardClick: (Int?) -> Unit
 ) {
     var isLoading by remember { mutableStateOf(false) }
-    ElevatedCard(
+    Card(
         modifier = modifier,
         shape = RoundedCornerShape(15.dp),
         colors = CardDefaults.elevatedCardColors(
@@ -63,8 +64,7 @@ fun MovieCard(
             Column {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
+                        .fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
@@ -116,42 +116,6 @@ fun MovieCard(
                         )
                     }
                 }
-                /*
-
-                                Row(
-                                    Modifier
-                                        .padding(horizontal = 10.dp, vertical = 10.dp)
-                                        .fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = movie?.title ?: "",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onTertiary,
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(3.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = movie?.vote_average?.round(1)?.toString() ?: "",
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            color = MaterialTheme.colorScheme.onTertiary,
-                                            fontWeight = FontWeight.SemiBold
-                                        )
-                                        Icon(
-                                            painter = painterResource(Res.drawable.ic_star_filled),
-                                            contentDescription = "star_icon",
-                                            modifier = Modifier.offset(2.dp)
-                                                .size(MaterialTheme.typography.bodyLarge.fontSize.value.dp),
-                                            tint = MaterialTheme.colorScheme.onTertiary
-                                        )
-                                    }
-                                }
-                */
-
             }
         }
     )

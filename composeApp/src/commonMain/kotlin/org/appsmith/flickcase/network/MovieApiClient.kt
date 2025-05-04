@@ -151,7 +151,7 @@ class MovieApiClient(
         }
     }
 
-    suspend fun getMovieDetails(
+    suspend fun getContentDetails(
         forMovies: Boolean,
         movieId: Int?
     ): Result<MovieDetailsResponse?, NetworkError> {

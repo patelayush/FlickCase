@@ -1,13 +1,17 @@
 package org.appsmith.flickcase.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -16,10 +20,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,21 +52,42 @@ fun GenreSection(
 @Composable
 fun GenreRow(
     modifier: Modifier = Modifier,
-    genres: List<Genre?>,
+    genres: SnapshotStateList<Genre>,
+    selectedGenres: SnapshotStateList<Genre>,
     onGenreSelected: (Genre) -> Unit = {},
     onGenreRemoved: (Genre) -> Unit = {}
 ) {
+    println("noddy" + selectedGenres)
+    println("noddy" + genres)
     LazyRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(horizontal = 15.dp)
     ) {
-        items(genres) { genre ->
-            GenreChip(
+        items(selectedGenres) { genre ->
+            GenreChipSelectable(
                 genre = genre,
+                genreSelected = true,
                 genreTextStyle = MaterialTheme.typography.bodyLarge,
-                generateRandomColor = false,
-                onGenreSelected = onGenreSelected,
-                onGenreRemoved = onGenreRemoved
+                onGenreRemoved = {
+                    val selectedGenresCopy = selectedGenres - it
+                    selectedGenres.clear()
+                    selectedGenres.addAll(selectedGenresCopy)
+                    onGenreRemoved(it)
+                }
+            )
+        }
+        items(genres.filterNot { selectedGenres.contains(it) }) { genre ->
+            GenreChipSelectable(
+                genre = genre,
+                genreSelected = false,
+                genreTextStyle = MaterialTheme.typography.bodyLarge,
+                onGenreSelected = {
+                    val selectedGenresCopy = selectedGenres + it
+                    selectedGenres.clear()
+                    selectedGenres.addAll(selectedGenresCopy)
+                    onGenreSelected(it)
+                },
             )
         }
     }
@@ -73,34 +96,14 @@ fun GenreRow(
 @Composable
 fun GenreChip(
     genre: Genre?,
-    generateRandomColor: Boolean = true,
-    genreTextStyle:TextStyle = MaterialTheme.typography.labelMedium,
-    onGenreSelected: (Genre) -> Unit = {},
-    onGenreRemoved: (Genre) -> Unit = {}
+    genreTextStyle: TextStyle = MaterialTheme.typography.labelMedium,
 ) {
-    var genreSelected by rememberSaveable { mutableStateOf(false) }
-    val skillColorSet =
-        if (generateRandomColor) getGenreColorSet()
-        else {
-            if (genreSelected) Pair(
-                MaterialTheme.colorScheme.primaryContainer,
-                MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            else Pair(
-                MaterialTheme.colorScheme.secondaryContainer,
-                MaterialTheme.colorScheme.onSecondaryContainer
-            )
-        }
+    val genreColorSet = getGenreColorSet()
     genre?.let {
         Card(
             colors = CardDefaults.cardColors(
-                containerColor = skillColorSet.first,
+                containerColor = genreColorSet.first,
             ),
-            onClick = {
-                genreSelected = !genreSelected
-                if (genreSelected) onGenreSelected(genre)
-                else onGenreRemoved(genre)
-            }
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
@@ -111,7 +114,61 @@ fun GenreChip(
                     style = genreTextStyle,
                     text = genre.name ?: "",
                     modifier = Modifier,
-                    color = skillColorSet.second
+                    color = genreColorSet.second
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun GenreChipSelectable(
+    genre: Genre?,
+    genreSelected: Boolean = false,
+    genreTextStyle: TextStyle = MaterialTheme.typography.labelMedium,
+    onGenreSelected: (Genre) -> Unit = {},
+    onGenreRemoved: (Genre) -> Unit = {}
+) {
+    val genreColorSet = Pair(
+        MaterialTheme.colorScheme.primaryContainer,
+        MaterialTheme.colorScheme.onPrimaryContainer
+    )
+    genre?.let {
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = Color.Transparent,
+            ),
+            onClick = {
+                if (genreSelected) onGenreRemoved(genre)
+                else onGenreSelected(genre)
+            },
+            shape = RoundedCornerShape(20.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .then(
+                        if(genreSelected){
+                            Modifier.background(
+                                color = genreColorSet.first
+                            )
+                        } else
+                            Modifier
+                                .background(Color.Transparent)
+                                .border(
+                                    2.dp,
+                                    genreColorSet.first,
+                                    RoundedCornerShape(20.dp)
+                                )
+
+                    ).padding(horizontal = 10.dp, vertical = 5.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    style = genreTextStyle,
+                    text = genre.name ?: "",
+                    modifier = Modifier,
+                    color = if(genreSelected) genreColorSet.second else MaterialTheme.colorScheme.onSurface
                 )
 
                 if (genreSelected) {
@@ -119,7 +176,7 @@ fun GenreChip(
                         Icons.Default.Close,
                         modifier = Modifier.size(genreTextStyle.fontSize.value.dp),
                         contentDescription = "selected",
-                        tint = skillColorSet.second,
+                        tint = genreColorSet.second,
                     )
                 }
             }

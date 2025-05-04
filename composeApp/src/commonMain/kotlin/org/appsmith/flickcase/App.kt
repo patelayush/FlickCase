@@ -108,14 +108,12 @@ fun App(
 
                     Screen.Search -> {
                         SearchScreen(
-                            client = client,
                             homeViewModel = homeViewModel
                         )
                     }
 
                     Screen.Genres -> {
                         GenresScreen(
-                            client = client,
                             homeViewModel = homeViewModel
                         )
                     }
@@ -123,11 +121,11 @@ fun App(
             }
 
             MovieDetails(
-                showDialog = homeViewModel.movieDetails.value != null,
-                movie = homeViewModel.movieDetails.value,
+                showDialog = homeViewModel.contentDetails.value != null,
+                movie = homeViewModel.contentDetails.value,
                 configuration = homeViewModel.configuration.value,
                 onDismiss = {
-                    homeViewModel.movieDetails.value = null
+                    homeViewModel.contentDetails.value = null
                 }
             )
             if (homeViewModel.errorMessage.value.isNotBlank()) {

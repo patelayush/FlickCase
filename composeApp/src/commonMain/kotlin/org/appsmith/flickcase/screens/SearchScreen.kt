@@ -29,7 +29,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import org.appsmith.flickcase.components.FilmestrySearchBar
+import org.appsmith.flickcase.components.SearchBar
 import org.appsmith.flickcase.components.MovieCard
 import org.appsmith.flickcase.network.MovieApiClient
 import org.appsmith.flickcase.viewmodel.HomeViewModel
@@ -38,7 +38,6 @@ import org.appsmith.flickcase.viewmodel.HomeViewModel
 @Composable
 fun SearchScreen(
     modifier: Modifier = Modifier,
-    client: MovieApiClient,
     homeViewModel: HomeViewModel
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -53,18 +52,18 @@ fun SearchScreen(
                 .animateContentSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            FilmestrySearchBar(
+            SearchBar(
                 query = searchQuery,
                 onQueryChange = { newQuery ->
                     searchQuery = newQuery
                     onTyping = true
                 },
                 onSearch = { query ->
-                    homeViewModel.searchMovie(query)
+                    homeViewModel.searchContent(query)
                     onTyping = false
                 }
             )
-            if (homeViewModel.searchedMovies.value?.isNotEmpty() == true && searchQuery.isNotBlank() && !onTyping) {
+            if (homeViewModel.searchedContent.value?.isNotEmpty() == true && searchQuery.isNotBlank() && !onTyping) {
                 Column(
                     Modifier
                         .verticalScroll(rememberScrollState())
@@ -94,22 +93,23 @@ fun SearchScreen(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalArrangement = Arrangement.spacedBy(15.dp)
                     ) {
-                        homeViewModel.searchedMovies.value?.forEach {
+                        homeViewModel.searchedContent.value?.forEach {
                             MovieCard(
                                 modifier = Modifier
-                                    .width(180.dp),
+                                    .width(180.dp)
+                                    .height(200.dp),
                                 movie = it,
                                 configuration = homeViewModel.configuration.value,
-                                showImageLoader = homeViewModel.isMovieDetailsLoading.value,
+                                showImageLoader = homeViewModel.isContentDetailsLoading.value,
                                 onCardClick = {
-                                    homeViewModel.getMovieDetails(it)
+                                    homeViewModel.getContentDetails(it)
                                 }
                             )
                         }
                     }
                     Spacer(Modifier.height(30.dp))
                 }
-            } else if (homeViewModel.searchedMovies.value?.isEmpty() == true && searchQuery.isNotBlank()) {
+            } else if (homeViewModel.searchedContent.value?.isEmpty() == true && searchQuery.isNotBlank()) {
                 Column(
                     Modifier
                         .verticalScroll(rememberScrollState())

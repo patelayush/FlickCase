@@ -60,7 +60,7 @@ fun HomeScreen(
     var showRegionSelector by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        if (homeViewModel.trendingMovies.value == null) {
+        if (homeViewModel.trendingContent.value == null) {
             homeViewModel.isLoading.value = true
             homeViewModel.init()
         }
@@ -124,7 +124,7 @@ fun HomeScreen(
                 ) {
                     Text(
                         text = "Movies",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodySmall,
                         color =  if(homeViewModel.showMovies.value) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurface,
                         letterSpacing = 0.1.em
                     )
@@ -157,7 +157,7 @@ fun HomeScreen(
                 ) {
                     Text(
                         text = "Tv Shows",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodySmall,
                         color =  if(!homeViewModel.showMovies.value) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurface,
                         letterSpacing = 0.1.em
                     )
@@ -175,13 +175,13 @@ fun HomeScreen(
                 HomeScreenContent(
                     modifier = Modifier.fillMaxSize(),
                     contentTypeMovie = homeViewModel.showMovies.value,
-                    trendingMovies = homeViewModel.trendingMovies.value,
+                    trendingMovies = homeViewModel.trendingContent.value,
                     configuration = homeViewModel.configuration.value,
                     nowPlayingMovies = homeViewModel.nowPlayingMovies.value,
-                    moviesByGenre = homeViewModel.moviesByGenre.value,
-                    showMovieLoader = homeViewModel.isMovieDetailsLoading.value,
+                    moviesByGenre = homeViewModel.contentByGenre.value,
+                    showMovieLoader = homeViewModel.isContentDetailsLoading.value,
                     onMovieClicked = {
-                        homeViewModel.getMovieDetails(it)
+                        homeViewModel.getContentDetails(it)
                     }
                 )
             }
@@ -238,10 +238,10 @@ fun HomeScreenContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        top = if (index == 0) 20.dp else 0.dp,
+                        top = 20.dp,
                         start = 20.dp
                     ),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
 
@@ -256,9 +256,10 @@ fun HomeScreenContent(
                         modifier = Modifier
                             .padding(
                                 start = if (index == 0) 20.dp else 0.dp,
-                                end = if (index == trendingMovies?.results?.lastIndex) 20.dp else 0.dp
+                                end = if (index == categories.second.lastIndex) 0.dp else 0.dp
                             )
-                            .width(160.dp),
+                            .width(160.dp)
+                            .height(200.dp),
                         movie = movie,
                         showImageLoader = showMovieLoader,
                         configuration = configuration,
@@ -268,7 +269,9 @@ fun HomeScreenContent(
                     )
                 }
             }
+        }
 
+        item {
             Spacer(Modifier.height(30.dp))
         }
     }

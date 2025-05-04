@@ -20,8 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.appsmith.flickcase.components.GenreRow
@@ -33,10 +35,8 @@ import org.appsmith.flickcase.viewmodel.HomeViewModel
 @Composable
 fun GenresScreen(
     modifier: Modifier = Modifier,
-    client: MovieApiClient,
     homeViewModel: HomeViewModel
 ) {
-    var showResults by remember { mutableStateOf(false) }
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -45,18 +45,14 @@ fun GenresScreen(
         ) {
             GenreRow(
                 modifier = Modifier.padding(top = 40.dp),
-                genres = homeViewModel.movieGenres.value ?: listOf(),
+                genres = homeViewModel.contentGenres,
+                selectedGenres = homeViewModel.selectedGenres,
                 onGenreSelected = {
-                    showResults = true
-                    homeViewModel.selectedMovieGenres.value.add(it)
                     homeViewModel.getMoviesByMultipleGenres()
                 },
                 onGenreRemoved = {
-                    homeViewModel.selectedMovieGenres.value.remove(it)
-                    if (homeViewModel.selectedMovieGenres.value.isNotEmpty()) {
+                    if (homeViewModel.selectedGenres.isNotEmpty()) {
                         homeViewModel.getMoviesByMultipleGenres()
-                    } else {
-                        showResults = false
                     }
                 }
             )
@@ -64,28 +60,46 @@ fun GenresScreen(
                 .padding(horizontal = 20.dp)
                 .padding(top = 30.dp)
                 .verticalScroll(rememberScrollState())) {
-                if (!showResults) {
+                if (homeViewModel.contentByMultipleGenre.isEmpty() || homeViewModel.selectedGenres.isEmpty()) {
+                    if(homeViewModel.selectedGenres.isEmpty()) {
+                        Text(
+                            text = "Search for ${if (homeViewModel.showMovies.value) "movies" else "tv shows"} by genre",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        Text(
+                            text = "No results found.",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                     Text(
-                        text = "Search for movies by genre",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        text = "If you're looking for ${if(homeViewModel.showMovies.value) "tv shows" else "movies"}, please toggle through Home screen.",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.tertiary,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.padding(top = 5.dp).fillMaxWidth()
                     )
                 } else {
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(15.dp)
+                        verticalArrangement = Arrangement.spacedBy(15.dp),
                     ) {
-                        homeViewModel.moviesByMultipleGenre.value.forEach {
+                        homeViewModel.contentByMultipleGenre.forEach {
                             MovieCard(
                                 modifier = Modifier
-                                    .width(180.dp),
+                                    .width(180.dp)
+                                    .height(200.dp),
                                 movie = it,
                                 configuration = homeViewModel.configuration.value,
-                                showImageLoader = homeViewModel.isMovieDetailsLoading.value,
+                                showImageLoader = homeViewModel.isContentDetailsLoading.value,
                                 onCardClick = {
-                                    homeViewModel.getMovieDetails(it)
+                                    homeViewModel.getContentDetails(it)
                                 }
                             )
                         }
