@@ -64,7 +64,7 @@ fun MovieDetails(
                         contentAlignment = Alignment.Center
                     ) {
                         AsyncImage(
-                            model = "${configuration?.images?.secure_base_url}original${movie?.backdrop_path}",
+                            model = "${configuration?.images?.secure_base_url}original${movie?.backdrop_path?.takeIf { it.isNotBlank() } ?: movie?.poster_path}",
                             contentDescription = "",
                             contentScale = ContentScale.FillBounds,
                             filterQuality = FilterQuality.High,
@@ -92,17 +92,19 @@ fun MovieDetails(
                     Column(Modifier.padding(horizontal = 15.dp).padding(bottom = 30.dp)) {
                         Text(
                             modifier = Modifier.padding(top = 20.dp),
-                            text = movie?.title ?: "",
+                            text = movie?.title ?:movie?.name ?: "",
                             style = MaterialTheme.typography.headlineMedium,
                             color = MaterialTheme.colorScheme.onBackground
                         )
-                        Text(
-                            modifier = Modifier.padding(),
-                            text = movie?.tagline ?: "",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontStyle = FontStyle.Italic,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
+                        if(!movie?.tagline.isNullOrBlank()) {
+                            Text(
+                                modifier = Modifier.padding(),
+                                text = movie?.tagline ?: "",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontStyle = FontStyle.Italic,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
                         GenreSection(
                             modifier = Modifier.padding(top = 5.dp),
                             genres = movie?.genres ?: listOf()
@@ -111,23 +113,25 @@ fun MovieDetails(
                             modifier = Modifier.padding(top = 15.dp),
                         ) {
                             Text(
-                                text ="${movie?.status ?: ""} in: ",
+                                text ="${if(movie?.first_air_date != null) "Released" else movie?.status ?: ""} in: ",
                                 color = MaterialTheme.colorScheme.onBackground,
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             Text(
-                                text = movie?.release_date?.substring(startIndex = 0, endIndex = 4) ?: "",
+                                text = (movie?.release_date?.takeIf { it.isNotBlank() }?: movie?.first_air_date)?.takeIf { it.isNotBlank() }?.substring(startIndex = 0, endIndex = 4) ?: "",
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.tertiary,
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }
-                        Text(
-                            modifier = Modifier.padding(top = 15.dp),
-                            text = movie?.overview ?: "",
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                        if(!movie?.overview.isNullOrBlank()) {
+                            Text(
+                                modifier = Modifier.padding(top = 15.dp),
+                                text = movie?.overview ?: "",
+                                color = MaterialTheme.colorScheme.onBackground,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
                     }
                 }
             }

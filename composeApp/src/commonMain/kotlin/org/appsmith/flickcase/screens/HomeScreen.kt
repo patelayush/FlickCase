@@ -3,6 +3,7 @@ package org.appsmith.flickcase.screens
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,8 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +33,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import filmestry.composeapp.generated.resources.Res
@@ -90,6 +92,77 @@ fun HomeScreen(
                     showRegionSelector = true
                 }
             }
+            Row(
+                modifier = Modifier.padding(horizontal = 20.dp).padding(bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .then(
+                            if(homeViewModel.showMovies.value){
+                                Modifier.background(
+                                    color = MaterialTheme.colorScheme.tertiaryContainer
+                                )
+                            } else
+                                Modifier
+                                    .background(Color.Transparent)
+                                    .border(
+                                        2.dp,
+                                        MaterialTheme.colorScheme.tertiaryContainer,
+                                        RoundedCornerShape(20.dp)
+                                    )
+
+                        ).padding(horizontal = 15.dp, vertical = 5.dp)
+                        .clickable {
+                            if(!homeViewModel.showMovies.value) {
+                                homeViewModel.showMovies.value = true
+                                homeViewModel.refresh()
+                            }
+                        }
+                ) {
+                    Text(
+                        text = "Movies",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color =  if(homeViewModel.showMovies.value) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurface,
+                        letterSpacing = 0.1.em
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .then(
+                            if(!homeViewModel.showMovies.value){
+                                Modifier.background(
+                                    color = MaterialTheme.colorScheme.tertiaryContainer
+                                )
+                            } else
+                                Modifier
+                                    .background(Color.Transparent)
+                                    .border(
+                                        2.dp,
+                                        MaterialTheme.colorScheme.tertiaryContainer,
+                                        RoundedCornerShape(20.dp)
+                                    )
+
+                        )
+                        .padding(horizontal = 15.dp, vertical = 5.dp)
+                        .clickable {
+                            if(homeViewModel.showMovies.value) {
+                                homeViewModel.showMovies.value = false
+                                homeViewModel.refresh()
+                            }
+                        }
+                ) {
+                    Text(
+                        text = "Tv Shows",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color =  if(!homeViewModel.showMovies.value) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurface,
+                        letterSpacing = 0.1.em
+                    )
+                }
+            }
             if (homeViewModel.isLoading.value) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(
@@ -101,6 +174,7 @@ fun HomeScreen(
             } else {
                 HomeScreenContent(
                     modifier = Modifier.fillMaxSize(),
+                    contentTypeMovie = homeViewModel.showMovies.value,
                     trendingMovies = homeViewModel.trendingMovies.value,
                     configuration = homeViewModel.configuration.value,
                     nowPlayingMovies = homeViewModel.nowPlayingMovies.value,
@@ -131,6 +205,7 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContent(
     modifier: Modifier = Modifier,
+    contentTypeMovie: Boolean = false,
     trendingMovies: MoviesResponse?,
     configuration: ConfigurationResponse?,
     nowPlayingMovies: NowPlayingMoviesResponse?,
@@ -139,13 +214,15 @@ fun HomeScreenContent(
     onMovieClicked: (Int?) -> Unit
 ) {
 
-    val categories: List<Pair<String, List<Movie?>>> = remember {
+    val categories: List<Pair<String, List<Movie?>>> = remember (contentTypeMovie) {
         mutableListOf(
-            Pair("Trending Movies", trendingMovies?.results ?: listOf()),
-            Pair("In Theatres", nowPlayingMovies?.results ?: listOf()),
+            Pair("Trending ${if(contentTypeMovie) "Movies" else "Tv Shows"}", trendingMovies?.results ?: listOf()),
         ).apply {
+            if(contentTypeMovie){
+               add(Pair("In Theatres", nowPlayingMovies?.results ?: listOf()))
+            }
             moviesByGenre.forEach {
-                add(Pair(("Popular ${it.genre.name}"), it.movies ?: listOf()))
+                add(Pair("Popular ${it.genre.name}", it.movies ?: listOf()))
             }
         }
     }

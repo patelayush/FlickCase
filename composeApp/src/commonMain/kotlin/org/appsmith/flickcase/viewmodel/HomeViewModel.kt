@@ -31,6 +31,8 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     val isLoading = mutableStateOf(false)
     val isMovieDetailsLoading = mutableStateOf(false)
 
+    // this bool would be used to separate movies & Tv shows. Assume tvshows in false case.
+    val showMovies = mutableStateOf(true)
     val nowPlayingMovies = mutableStateOf<NowPlayingMoviesResponse?>(null)
     val trendingMovies = mutableStateOf<MoviesResponse?>(null)
     val configuration = mutableStateOf<ConfigurationResponse?>(null)
@@ -39,15 +41,25 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     val selectedMovieGenres = mutableStateOf(mutableListOf<Genre>())
     val moviesByGenre = mutableStateOf(mutableListOf<MoviesByGenre>())
     val moviesByMultipleGenre = mutableStateOf(listOf<Movie?>())
-    val searchedMovies = mutableStateOf<MoviesResponse?>(null)
+    val searchedMovies = mutableStateOf<List<Movie?>?>(null)
     val movieDetails = mutableStateOf<MovieDetailsResponse?>(null)
 
-    val popularGenres = listOf(
-        "Action",
-        "Thriller",
-        "Comedy",
-        "Horror"
-    )
+    val trendingTvShows = mutableStateOf<MoviesResponse?>(null)
+
+    fun getPopularGenres(): List<String> {
+        return if (showMovies.value) listOf(
+            "Action",
+            "Thriller",
+            "Comedy",
+            "Horror"
+        ) else listOf(
+            "Crime",
+            "Reality",
+            "Comedy",
+            "Drama",
+            "Documentary"
+        )
+    }
 
     fun init() {
         isLoading.value = true
@@ -55,7 +67,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
             settings.putInt(sessionCountKey, settings.getInt(sessionCountKey, 0) + 1)
             getConfigutation()
             getCountries()
-            getTrendingMovies()
+            getTrendingContent()
             getNowPlayingMovies()
             getMovieGenres()
         }.invokeOnCompletion {
@@ -66,9 +78,11 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     fun refresh() {
         isLoading.value = true
         viewModelScope.launch {
-            getTrendingMovies()
-            getNowPlayingMovies()
-            getFilteredMovieGenres()
+            if (showMovies.value) {
+                getNowPlayingMovies()
+            }
+            getTrendingContent()
+            getMovieGenres()
         }.invokeOnCompletion {
             isLoading.value = false
         }
@@ -88,8 +102,11 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
         }
     }
 
-    suspend fun getTrendingMovies() {
-        client.getTrendingMovies(region = selectedRegion.value)
+    suspend fun getTrendingContent() {
+        client.getTrendingContent(
+            forMovies = showMovies.value,
+            region = selectedRegion.value
+        )
             .onSuccess { response ->
                 response?.let {
                     trendingMovies.value = it
@@ -141,7 +158,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     }
 
     suspend fun getMovieGenres() {
-        client.getMovieGenres()
+        client.getContentGenres(forMovies = showMovies.value)
             .onSuccess { response ->
                 response?.let {
                     movieGenres.value = it.genres
@@ -154,21 +171,10 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
             }
     }
 
-    suspend fun getTVGenres() {
-        client.getMovieGenres()
-            .onSuccess { response ->
-                response?.let {
-                    movieGenres.value = it.genres
-                } ?: run {
-                    errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
-                }
-            }.onError {
-                errorMessage.value = ERROR_MSG.API_ERROR.msg
-            }
-    }
-
     suspend fun getMoviesByGenre(genre: Genre) {
-        client.searchMoviesByGenre(genreId = genre.id ?: 0, region = selectedRegion.value)
+        client.searchMoviesByGenre(
+            forMovies = showMovies.value, genreId = genre.id ?: 0, region = selectedRegion.value
+        )
             .onSuccess { response ->
                 response?.let {
                     moviesByGenre.value.add(
@@ -188,7 +194,8 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     fun getMoviesByMultipleGenres() {
         viewModelScope.launch {
             client.searchMoviesByMutlipleGenres(
-                genres = selectedMovieGenres.value?.map { it.id ?: 0 } ?: listOf(), region = selectedRegion.value
+                genres = selectedMovieGenres.value?.map { it.id ?: 0 } ?: listOf(),
+                region = selectedRegion.value
             )
                 .onSuccess { response ->
                     response?.let {
@@ -206,10 +213,17 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
         viewModelScope.launch {
             searchedMovies.value = null
             isLoading.value = true
-            client.searchMovie(query = query, region = selectedRegion.value)
+            client.searchContent(forMovies = true, query = query, region = selectedRegion.value)
                 .onSuccess { response ->
-                    response?.let {
-                        searchedMovies.value = it
+                    response?.let { movieResponse ->
+                        client.searchContent(forMovies = false, query = query, region = selectedRegion.value)
+                            .onSuccess { tvResponse ->
+                                val movies = movieResponse.results?.toMutableList() ?: mutableListOf()
+                                movies.addAll(tvResponse?.results ?: listOf())
+                                searchedMovies.value = movies.shuffled()
+                            }.onError {
+                                errorMessage.value = ERROR_MSG.API_ERROR.msg
+                            }
                     } ?: run {
                         errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
                     }
@@ -226,7 +240,10 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
             movieDetails.value = null
             isMovieDetailsLoading.value = true
             movieId?.let {
-                client.getMovieDetails(movieId = it)
+                client.getMovieDetails(
+                    forMovies = showMovies.value,
+                    movieId = it
+                )
                     .onSuccess { response ->
                         response?.let {
                             movieDetails.value = it
@@ -243,7 +260,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     }
 
     private fun hasSeenWelcomeScreen(): Boolean {
-       return settings.getInt(sessionCountKey, 0) != 0
+        return settings.getInt(sessionCountKey, 0) != 0
     }
 
     fun setSelectedRegion(region: String) {
@@ -260,7 +277,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     suspend fun getFilteredMovieGenres() {
         moviesByGenre.value.clear()
         val popularGenres =
-            movieGenres.value?.filter { popularGenres.contains(it.name) } ?: listOf()
+            movieGenres.value?.filter { getPopularGenres().contains(it.name) } ?: listOf()
         popularGenres.forEach {
             getMoviesByGenre(it)
         }

@@ -53,7 +53,7 @@ fun MovieCard(
         modifier = modifier,
         shape = RoundedCornerShape(15.dp),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = if(isLoading) MaterialTheme.colorScheme.tertiaryContainer else Color.Transparent,
+            containerColor = if(isLoading) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
         ),
         onClick = {
             onCardClick(movie?.id)
@@ -68,7 +68,7 @@ fun MovieCard(
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
-                        model = "${configuration?.images?.secure_base_url}original${movie?.poster_path}",
+                        model = "${configuration?.images?.secure_base_url}original${movie?.poster_path?.takeIf { it.isNotBlank() } ?: movie?.backdrop_path}",
                         contentDescription = "",
                         contentScale = ContentScale.FillBounds,
                         filterQuality = FilterQuality.High,
@@ -87,7 +87,7 @@ fun MovieCard(
                     )
                     if (isLoading || showImageLoader) {
                         CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.onTertiary,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
                             strokeWidth = 5.dp,
                             modifier = Modifier.size(20.dp)
                         )
@@ -98,13 +98,13 @@ fun MovieCard(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .wrapContentWidth()
-                            .background(MaterialTheme.colorScheme.tertiaryContainer)
+                            .background(MaterialTheme.colorScheme.secondaryContainer)
                             .padding(horizontal = 5.dp, vertical = 3.dp)
                     ) {
                         Text(
                             text = movie?.vote_average?.round(1)?.toString() ?: "",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onTertiary,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
                             fontWeight = FontWeight.Bold
                         )
                         Icon(
@@ -112,7 +112,7 @@ fun MovieCard(
                             contentDescription = "star_icon",
                             modifier = Modifier.offset(2.dp)
                                 .size(MaterialTheme.typography.bodySmall.fontSize.value.dp),
-                            tint = MaterialTheme.colorScheme.onTertiary
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     }
                 }

@@ -64,7 +64,7 @@ fun SearchScreen(
                     onTyping = false
                 }
             )
-            if (!homeViewModel.searchedMovies.value?.results.isNullOrEmpty() && searchQuery.isNotBlank() && !onTyping) {
+            if (homeViewModel.searchedMovies.value?.isNotEmpty() == true && searchQuery.isNotBlank() && !onTyping) {
                 Column(
                     Modifier
                         .verticalScroll(rememberScrollState())
@@ -94,7 +94,7 @@ fun SearchScreen(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalArrangement = Arrangement.spacedBy(15.dp)
                     ) {
-                        homeViewModel.searchedMovies.value?.results?.forEach {
+                        homeViewModel.searchedMovies.value?.forEach {
                             MovieCard(
                                 modifier = Modifier
                                     .width(180.dp),
@@ -109,7 +109,7 @@ fun SearchScreen(
                     }
                     Spacer(Modifier.height(30.dp))
                 }
-            } else if (homeViewModel.searchedMovies.value?.results?.isEmpty() == true && searchQuery.isNotBlank()) {
+            } else if (homeViewModel.searchedMovies.value?.isEmpty() == true && searchQuery.isNotBlank()) {
                 Column(
                     Modifier
                         .verticalScroll(rememberScrollState())
