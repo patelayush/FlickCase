@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 import org.appsmith.flickcase.components.BottomNavigationBar
 import org.appsmith.flickcase.components.MovieDetails
 import org.appsmith.flickcase.network.MovieApiClient
+import org.appsmith.flickcase.screens.AboutScreen
 import org.appsmith.flickcase.screens.GenresScreen
 import org.appsmith.flickcase.screens.HomeScreen
 import org.appsmith.flickcase.screens.SearchScreen
@@ -116,6 +117,10 @@ fun App(
                         GenresScreen(
                             homeViewModel = homeViewModel
                         )
+                    }
+
+                    Screen.About -> {
+                        AboutScreen()
                     }
                 }
             }

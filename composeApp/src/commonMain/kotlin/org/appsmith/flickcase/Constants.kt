@@ -20,4 +20,5 @@ enum class Screen(val screenName: String, val route: String) {
     Home("Home", "home"),
     Search("Search", "search"),
     Genres("Genres", "genres"),
+    About("About", "about"),
 }

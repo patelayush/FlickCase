@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import filmestry.composeapp.generated.resources.Res
+import filmestry.composeapp.generated.resources.ic_about
 import filmestry.composeapp.generated.resources.ic_filter
 import filmestry.composeapp.generated.resources.ic_home
 import filmestry.composeapp.generated.resources.ic_home_filled
@@ -83,5 +84,9 @@ enum class NavItem(
     GENRES(
         screen = Screen.Genres,
         icon = Res.drawable.ic_filter,
+    ),
+    About(
+        screen = Screen.About,
+        icon = Res.drawable.ic_about,
     ),
 }

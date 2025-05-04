@@ -15,6 +15,8 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
 }
 
+val versionName = "1.0"
+
 kotlin {
     androidTarget {
         compilerOptions {
@@ -117,6 +119,7 @@ buildkonfig {
         }.getProperty("API_KEY")
 
         buildConfigField(FieldSpec.Type.STRING, "API_KEY", apiKey)
+        buildConfigField(FieldSpec.Type.STRING, "version", versionName)
     }
 }
 
@@ -134,7 +137,7 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "1.0"
+        versionName = versionName
     }
     signingConfigs {
         create("release") {
