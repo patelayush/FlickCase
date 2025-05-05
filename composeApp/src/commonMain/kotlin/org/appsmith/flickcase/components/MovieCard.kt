@@ -44,7 +44,7 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun MovieCard(
     modifier: Modifier,
-    movie: Movie?,
+    movie: Movie? = null,
     showImageLoader: Boolean = false,
     configuration: ConfigurationResponse?,
     onCardClick: (Int?) -> Unit

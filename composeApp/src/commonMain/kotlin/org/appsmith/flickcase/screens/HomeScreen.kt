@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -26,11 +27,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +44,9 @@ import androidx.compose.ui.unit.em
 import filmestry.composeapp.generated.resources.Res
 import filmestry.composeapp.generated.resources.app_icon
 import filmestry.composeapp.generated.resources.ic_language
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 import org.appsmith.flickcase.APP_NAME
 import org.appsmith.flickcase.components.MovieCard
 import org.appsmith.flickcase.components.RegionPicker
@@ -48,6 +55,8 @@ import org.appsmith.flickcase.model.movies.Movie
 import org.appsmith.flickcase.model.movies.MoviesByGenre
 import org.appsmith.flickcase.model.movies.MoviesResponse
 import org.appsmith.flickcase.model.nowplayingmovies.NowPlayingMoviesResponse
+import org.appsmith.flickcase.nowPlayingCategory
+import org.appsmith.flickcase.trendingCategory
 import org.appsmith.flickcase.viewmodel.HomeViewModel
 import org.jetbrains.compose.resources.painterResource
 
@@ -60,7 +69,7 @@ fun HomeScreen(
     var showRegionSelector by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        if (homeViewModel.trendingContent.value == null) {
+        if (homeViewModel.trendingContent.isEmpty()) {
             homeViewModel.isLoading.value = true
             homeViewModel.init()
         }
@@ -175,13 +184,17 @@ fun HomeScreen(
                 HomeScreenContent(
                     modifier = Modifier.fillMaxSize(),
                     contentTypeMovie = homeViewModel.showMovies.value,
-                    trendingMovies = homeViewModel.trendingContent.value,
+                    trendingMovies = homeViewModel.trendingContent,
                     configuration = homeViewModel.configuration.value,
-                    nowPlayingMovies = homeViewModel.nowPlayingMovies.value,
-                    moviesByGenre = homeViewModel.contentByGenre.value,
+                    nowPlayingMovies = homeViewModel.nowPlayingMovies,
+                    moviesByGenre = homeViewModel.contentByGenre,
                     showMovieLoader = homeViewModel.isContentDetailsLoading.value,
+                    isLoadingAdditionalMovies = homeViewModel.isLoadingAdditionalMovies.value,
                     onMovieClicked = {
                         homeViewModel.getContentDetails(it)
+                    },
+                    loadMoreMovies = {
+                        homeViewModel.loadMoreMovies(it)
                     }
                 )
             }
@@ -206,20 +219,22 @@ fun HomeScreen(
 fun HomeScreenContent(
     modifier: Modifier = Modifier,
     contentTypeMovie: Boolean = false,
-    trendingMovies: MoviesResponse?,
+    trendingMovies: List<Movie?>?,
     configuration: ConfigurationResponse?,
-    nowPlayingMovies: NowPlayingMoviesResponse?,
+    nowPlayingMovies: List<Movie?>?,
     moviesByGenre: List<MoviesByGenre>,
     showMovieLoader: Boolean,
-    onMovieClicked: (Int?) -> Unit
+    isLoadingAdditionalMovies: Boolean,
+    onMovieClicked: (Int?) -> Unit,
+    loadMoreMovies: (String) -> Unit
 ) {
 
     val categories: List<Pair<String, List<Movie?>>> = remember (contentTypeMovie) {
         mutableListOf(
-            Pair("Trending ${if(contentTypeMovie) "Movies" else "Tv Shows"}", trendingMovies?.results ?: listOf()),
+            Pair("$trendingCategory ${if(contentTypeMovie) "Movies" else "Tv Shows"}", trendingMovies ?: listOf()),
         ).apply {
             if(contentTypeMovie){
-               add(Pair("In Theatres", nowPlayingMovies?.results ?: listOf()))
+               add(Pair(nowPlayingCategory, nowPlayingMovies ?: listOf()))
             }
             moviesByGenre.forEach {
                 add(Pair("Popular ${it.genre.name}", it.movies ?: listOf()))
@@ -245,8 +260,32 @@ fun HomeScreenContent(
                 color = MaterialTheme.colorScheme.primary,
             )
 
+            val listState = rememberLazyListState()
+
+            val shouldLoadMore = remember {
+                derivedStateOf {
+                    // Get the total number of items in the list
+                    val totalItemsCount = listState.layoutInfo.totalItemsCount
+                    // Get the index of the last visible item
+                    val lastVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    // Check if we have scrolled near the end of the list and more items should be loaded
+                    lastVisibleItemIndex >= (totalItemsCount - 1) && !isLoadingAdditionalMovies
+                }
+            }
+
+            // Launch a coroutine to load more items when shouldLoadMore becomes true
+            LaunchedEffect(listState) {
+                snapshotFlow { shouldLoadMore.value }
+                    .distinctUntilChanged()
+                    .filter { it }  // Ensure that we load more items only when needed
+                    .collect {
+                        loadMoreMovies(categories.first)
+                    }
+            }
+
             LazyRow(
-                Modifier.padding(top = 10.dp),
+                state = listState,
+                modifier = Modifier.padding(top = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 itemsIndexed(
@@ -256,7 +295,7 @@ fun HomeScreenContent(
                         modifier = Modifier
                             .padding(
                                 start = if (index == 0) 20.dp else 0.dp,
-                                end = if (index == categories.second.lastIndex) 0.dp else 0.dp
+                                end = if (index == categories.second.lastIndex) 20.dp else 0.dp
                             )
                             .width(160.dp)
                             .height(200.dp),
@@ -267,6 +306,25 @@ fun HomeScreenContent(
                             onMovieClicked(it)
                         }
                     )
+                }
+                if (isLoadingAdditionalMovies) {
+                    item {
+                        MovieCard(
+                            modifier = Modifier
+                                .padding(
+                                    start = if (index == 0) 20.dp else 0.dp,
+                                    end = if (index == categories.second.lastIndex) 0.dp else 0.dp
+                                )
+                                .width(160.dp)
+                                .height(200.dp),
+                            movie = null,
+                            showImageLoader = isLoadingAdditionalMovies,
+                            configuration = configuration,
+                            onCardClick = {
+                                onMovieClicked(it)
+                            }
+                        )
+                    }
                 }
             }
         }

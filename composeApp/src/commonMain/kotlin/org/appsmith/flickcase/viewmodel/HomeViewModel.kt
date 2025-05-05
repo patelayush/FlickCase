@@ -2,7 +2,6 @@ package org.appsmith.flickcase.viewmodel
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,8 +14,6 @@ import org.appsmith.flickcase.model.genre.Genre
 import org.appsmith.flickcase.model.moviedetails.MovieDetailsResponse
 import org.appsmith.flickcase.model.movies.Movie
 import org.appsmith.flickcase.model.movies.MoviesByGenre
-import org.appsmith.flickcase.model.movies.MoviesResponse
-import org.appsmith.flickcase.model.nowplayingmovies.NowPlayingMoviesResponse
 import org.appsmith.flickcase.network.MovieApiClient
 import org.appsmith.flickcase.network.util.onError
 import org.appsmith.flickcase.network.util.onSuccess
@@ -31,19 +28,22 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     val currentScreen = mutableStateOf(if (hasSeenWelcomeScreen()) Screen.Home else Screen.Welcome)
     val errorMessage = mutableStateOf("")
     val isLoading = mutableStateOf(false)
+    val isLoadingAdditionalMovies = mutableStateOf(false)
     val isContentDetailsLoading = mutableStateOf(false)
 
     // this bool would be used to separate movies & Tv shows. Assume tvshows in false case.
     val showMovies = mutableStateOf(true)
-    val nowPlayingMovies = mutableStateOf<NowPlayingMoviesResponse?>(null)
-    val trendingContent = mutableStateOf<MoviesResponse?>(null)
+    val nowPlayingMovies = mutableStateListOf<Movie?>()
+    val nowPlayingMoviesPage = mutableStateOf(1)
+    val trendingContent = mutableStateListOf<Movie?>()
+    val trendingContentPage = mutableStateOf(1)
     val configuration = mutableStateOf<ConfigurationResponse?>(null)
     val countries = mutableStateOf<List<String>?>(null)
     val contentGenres = mutableStateListOf<Genre>()
     val selectedGenres = mutableStateListOf<Genre>()
-    val contentByGenre = mutableStateOf(mutableListOf<MoviesByGenre>())
+    val contentByGenre = mutableStateListOf<MoviesByGenre>()
     val contentByMultipleGenre = mutableStateListOf<Movie?>()
-    val searchedContent = mutableStateOf<List<Movie?>?>(null)
+    val searchedContent = mutableStateListOf<Movie?>(null)
     val contentDetails = mutableStateOf<MovieDetailsResponse?>(null)
 
     fun getPopularGenres(): List<String> {
@@ -78,14 +78,27 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     fun refresh() {
         isLoading.value = true
         viewModelScope.launch {
+            resetTrendingContent()
+            resetNowPlayingContent()
             if (showMovies.value) {
                 getNowPlayingMovies()
             }
             getTrendingContent()
+            contentByGenre.clear()
             getContentGenres()
         }.invokeOnCompletion {
             isLoading.value = false
         }
+    }
+
+    private fun resetNowPlayingContent() {
+        nowPlayingMovies.clear()
+        nowPlayingMoviesPage.value = 1
+    }
+
+    private fun resetTrendingContent() {
+        trendingContent.clear()
+        trendingContentPage.value = 1
     }
 
     fun authenticate() {
@@ -104,12 +117,16 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
 
     suspend fun getTrendingContent() {
         client.getTrendingContent(
+            page = trendingContentPage.value,
             forMovies = showMovies.value,
             region = selectedRegion.value
         )
             .onSuccess { response ->
                 response?.let {
-                    trendingContent.value = it
+                    if (it.results?.isEmpty() == true && it.page >= it.total_pages) {
+                        errorMessage.value = ERROR_MSG.REACHED_END.msg
+                    }
+                    trendingContent.addAll(it.results ?: listOf())
                 } ?: run {
                     errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
                 }
@@ -145,10 +162,13 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     }
 
     suspend fun getNowPlayingMovies() {
-        client.getNowPlayingMovies(region = selectedRegion.value)
+        client.getNowPlayingMovies(page = nowPlayingMoviesPage.value, region = selectedRegion.value)
             .onSuccess { response ->
                 response?.let {
-                    nowPlayingMovies.value = it
+                    if (it.results?.isEmpty() == true && it.page >= it.total_pages) {
+                        errorMessage.value = ERROR_MSG.REACHED_END.msg
+                    }
+                    nowPlayingMovies.addAll(it.results ?: listOf())
                 } ?: run {
                     errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
                 }
@@ -172,24 +192,30 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
             }
     }
 
-    suspend fun getMoviesByGenre(genre: Genre) {
+    suspend fun getMoviesByGenre(genre: Genre, page: Int = 1) {
         client.searchMoviesByGenre(
-            forMovies = showMovies.value, genreId = genre.id ?: 0, region = selectedRegion.value
-        )
-            .onSuccess { response ->
-                response?.let {
-                    contentByGenre.value.add(
+            page = page, forMovies = showMovies.value, genreId = genre.id ?: 0,
+            region = selectedRegion.value
+        ).onSuccess { response ->
+            response?.let {
+                if (contentByGenre.any { it.genre == genre }) {
+                    contentByGenre.firstOrNull { it.genre == genre }?.movies?.addAll(
+                        it.results ?: listOf()
+                    )
+                } else {
+                    contentByGenre.add(
                         MoviesByGenre(
                             genre = genre,
-                            movies = it.results ?: listOf()
+                            movies = it.results?.toMutableList() ?: mutableListOf()
                         )
                     )
-                } ?: run {
-                    errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
                 }
-            }.onError {
-                errorMessage.value = ERROR_MSG.API_ERROR.msg
+            } ?: run {
+                errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
             }
+        }.onError {
+            errorMessage.value = ERROR_MSG.API_ERROR.msg
+        }
     }
 
     fun getMoviesByMultipleGenres() {
@@ -214,16 +240,22 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
 
     fun searchContent(query: String) {
         viewModelScope.launch {
-            searchedContent.value = null
             isLoading.value = true
-            client.searchContent(forMovies = true, query = query, region = selectedRegion.value)
-                .onSuccess { response ->
+            searchedContent.clear()
+            client.searchContent(
+                forMovies = true,
+                query = query,
+                region = selectedRegion.value
+            ).onSuccess { response ->
                     response?.let { movieResponse ->
-                        client.searchContent(forMovies = false, query = query, region = selectedRegion.value)
-                            .onSuccess { tvResponse ->
-                                val movies = movieResponse.results?.toMutableList() ?: mutableListOf()
-                                movies.addAll(tvResponse?.results ?: listOf())
-                                searchedContent.value = movies.shuffled()
+                        client.searchContent(
+                            forMovies = false,
+                            query = query,
+                            region = selectedRegion.value
+                        ).onSuccess { tvResponse ->
+                                val movies = movieResponse.results?.filter { it?.vote_average != 0.0 }?.toMutableList() ?: mutableListOf()
+                                movies.addAll(tvResponse?.results?.filter { it?.vote_average != 0.0 } ?: listOf())
+                                searchedContent.addAll(movies.shuffled())
                             }.onError {
                                 errorMessage.value = ERROR_MSG.API_ERROR.msg
                             }
@@ -246,8 +278,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
                 client.getContentDetails(
                     forMovies = showMovies.value,
                     movieId = it
-                )
-                    .onSuccess { response ->
+                ).onSuccess { response ->
                         response?.let {
                             contentDetails.value = it
                         } ?: run {
@@ -278,11 +309,36 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     }
 
     suspend fun getFilteredContentGenres() {
-        contentByGenre.value.clear()
+        contentByGenre.clear()
         val popularGenres =
             contentGenres.filter { getPopularGenres().contains(it.name) }
         popularGenres.forEach {
             getMoviesByGenre(it)
+        }
+    }
+
+    fun loadMoreMovies(category: String? = null) {
+        viewModelScope.launch {
+            isLoadingAdditionalMovies.value = true
+            if (category?.contains("Trending") == true) {
+                trendingContentPage.value++
+                getTrendingContent()
+            } else if (category?.contains("In Theatres") == true) {
+                nowPlayingMoviesPage.value++
+                getNowPlayingMovies()
+            } else {
+                contentByGenre.firstOrNull {
+                    category?.contains(
+                        it.genre.name ?: "default"
+                    ) == true
+                }
+                    ?.let {
+                        it.page++
+                        getMoviesByGenre(it.genre, it.page)
+                    }
+            }
+        }.invokeOnCompletion {
+            isLoadingAdditionalMovies.value = false
         }
     }
 }

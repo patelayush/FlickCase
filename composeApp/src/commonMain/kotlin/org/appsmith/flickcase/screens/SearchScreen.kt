@@ -63,7 +63,7 @@ fun SearchScreen(
                     onTyping = false
                 }
             )
-            if (homeViewModel.searchedContent.value?.isNotEmpty() == true && searchQuery.isNotBlank() && !onTyping) {
+            if (homeViewModel.searchedContent.isNotEmpty() && searchQuery.isNotBlank() && !onTyping) {
                 Column(
                     Modifier
                         .verticalScroll(rememberScrollState())
@@ -93,7 +93,7 @@ fun SearchScreen(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalArrangement = Arrangement.spacedBy(15.dp)
                     ) {
-                        homeViewModel.searchedContent.value?.forEach {
+                        homeViewModel.searchedContent.forEach {
                             MovieCard(
                                 modifier = Modifier
                                     .width(180.dp)
@@ -109,7 +109,7 @@ fun SearchScreen(
                     }
                     Spacer(Modifier.height(30.dp))
                 }
-            } else if (homeViewModel.searchedContent.value?.isEmpty() == true && searchQuery.isNotBlank()) {
+            } else if (homeViewModel.searchedContent.isEmpty() && searchQuery.isNotBlank() && !homeViewModel.isLoading.value) {
                 Column(
                     Modifier
                         .verticalScroll(rememberScrollState())

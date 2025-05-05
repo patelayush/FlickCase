@@ -31,7 +31,7 @@ fun SearchBar(
         value = query,
         onValueChange = onQueryChange,
         trailingIcon = {
-            IconButton(onClick = { onQueryChange(query) }) {
+            IconButton(onClick = { onSearch(query) }) {
                 Icon(
                     Icons.Filled.Search,
                     contentDescription = "Search",
