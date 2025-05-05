@@ -5,7 +5,8 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.1.20-blue.svg)](https://kotlinlang.org/)
 [![TMDb API](https://img.shields.io/badge/TMDb%20API-Used-yellow)](https://www.themoviedb.org/documentation/api)
 
-**FlickCase** is a sleek and intuitive application built with **Compose Multiplatform** that allows you to discover new movies and TV shows, explore by genre, and find detailed information about your favorites. Enjoy a consistent experience across various devices, powered by the vast data of the TMDb API.
+**FlickCase** is a sleek and intuitive application built with **Compose Multiplatform** that allows you to discover new movies and TV shows, explore by genre, and find detailed information about your favorites. Enjoy a consistent experience across various devices, powered by the vast data of the TMDb API. 
+*<br>Note - This is still under Development.*
 
 ## Features
 
@@ -34,8 +35,6 @@
 * **Material 3:** For a modern and consistent UI design.
 
 ## Getting Started
-
-*(Provide instructions on how to build and run your project. This will vary depending on your setup and target platforms.)*
 
 ### Prerequisites
 
