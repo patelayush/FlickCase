@@ -1,7 +1,8 @@
 # FlickCase - Your Movie & TV Show Discovery App
 
-[![Compose Multiplatform](https://img.shields.io/badge/Compose--Multiplatform-brightgreen.svg)](https://www.jetbrains.com/lp/compose-multiplatform/)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.22-blue.svg)](https://kotlinlang.org/)
+[![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.7.x-brightgreen)](https://kotlinlang.org/docs/compose-multiplatform.html)
+[![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20Desktop%20%7C%20Web-lightgrey)](https://kotlinlang.org/docs/compose-multiplatform.html)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.1.20-blue.svg)](https://kotlinlang.org/)
 [![TMDb API](https://img.shields.io/badge/TMDb%20API-Used-yellow)](https://www.themoviedb.org/documentation/api)
 
 **FlickCase** is a sleek and intuitive application built with **Compose Multiplatform** that allows you to discover new movies and TV shows, explore by genre, and find detailed information about your favorites. Enjoy a consistent experience across various devices, powered by the vast data of the TMDb API.
