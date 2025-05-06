@@ -102,7 +102,7 @@ fun SearchScreen(
                                 configuration = homeViewModel.configuration.value,
                                 showImageLoader = homeViewModel.isContentDetailsLoading.value,
                                 onCardClick = {
-                                    homeViewModel.getContentDetails(it)
+                                    homeViewModel.getContent(it)
                                 }
                             )
                         }

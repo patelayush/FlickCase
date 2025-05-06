@@ -39,7 +39,7 @@ fun GenreSection(
     FlowRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(0.dp)
+        verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         genres.forEach { genre ->
             GenreChip(
@@ -57,8 +57,6 @@ fun GenreRow(
     onGenreSelected: (Genre) -> Unit = {},
     onGenreRemoved: (Genre) -> Unit = {}
 ) {
-    println("noddy" + selectedGenres)
-    println("noddy" + genres)
     LazyRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(10.dp),

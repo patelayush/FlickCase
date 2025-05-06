@@ -5,6 +5,7 @@ import io.ktor.client.request.get
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import org.appsmith.flickcase.model.authentication.AuthenticationResponse
+import org.appsmith.flickcase.model.cast.CastDetailsResponse
 import org.appsmith.flickcase.model.configuration.ConfigurationResponse
 import org.appsmith.flickcase.model.configuration.Countries
 import org.appsmith.flickcase.model.genre.GenresResponse
@@ -39,7 +40,7 @@ class MovieApiClient(
         return try {
             val response =
                 httpClient.get(
-                    if (forMovies) "$tmdbApiHost/trending/movie/week?language=$language&region=$region&page=$page"
+                    if (forMovies) "$tmdbApiHost/trending/movie/day?language=$language&region=$region&page=$page"
                     else "$tmdbApiHost/trending/tv/day?language=$language&region=$region&page=$page"
                 )
             result<MoviesResponse?>(response)
@@ -92,10 +93,13 @@ class MovieApiClient(
         }
     }
 
-    suspend fun getTVGenres(): Result<GenresResponse?, NetworkError> {
+    suspend fun getCast(forMovies: Boolean, contentId: Int?): Result<CastDetailsResponse?, NetworkError> {
         return try {
-            val response = httpClient.get("$tmdbApiHost/genre/tv/list")
-            result<GenresResponse?>(response)
+            val response = httpClient.get(
+                if (forMovies) "$tmdbApiHost/movie/$contentId/credits"
+                else "$tmdbApiHost/tv/$contentId/credits"
+            )
+            result<CastDetailsResponse?>(response)
         } catch (e: Exception) {
             checkForError(e)
         }
@@ -162,18 +166,6 @@ class MovieApiClient(
             val response =
                 httpClient.get("$tmdbApiHost/${if (forMovies) "movie" else "tv"}/$movieId")
             result<MovieDetailsResponse?>(response)
-        } catch (e: Exception) {
-            checkForError(e)
-        }
-    }
-
-    suspend fun getTrendingTvShows(
-        language: String = "en-US",
-    ): Result<MoviesResponse?, NetworkError> {
-        return try {
-            val response =
-                httpClient.get("$tmdbApiHost/trending/tv/day?language=$language")
-            result<MoviesResponse?>(response)
         } catch (e: Exception) {
             checkForError(e)
         }

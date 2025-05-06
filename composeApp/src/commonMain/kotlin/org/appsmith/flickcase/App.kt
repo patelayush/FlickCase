@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import org.appsmith.flickcase.components.BottomNavigationBar
-import org.appsmith.flickcase.components.MovieDetails
+import org.appsmith.flickcase.components.MovieDetailSheet
 import org.appsmith.flickcase.network.MovieApiClient
 import org.appsmith.flickcase.screens.AboutScreen
 import org.appsmith.flickcase.screens.GenresScreen
@@ -125,14 +125,15 @@ fun App(
                 }
             }
 
-            MovieDetails(
-                showDialog = homeViewModel.contentDetails.value != null,
-                movie = homeViewModel.contentDetails.value,
-                configuration = homeViewModel.configuration.value,
-                onDismiss = {
-                    homeViewModel.contentDetails.value = null
-                }
-            )
+            if (homeViewModel.contentDetails.value != null) {
+                MovieDetailSheet(
+                    movie = homeViewModel.contentDetails.value,
+                    cast = homeViewModel.castDetails.value,
+                    configuration = homeViewModel.configuration.value,
+                    onDismissRequest = {
+                        homeViewModel.contentDetails.value = null
+                    })
+            }
             if (homeViewModel.errorMessage.value.isNotBlank()) {
                 scope.launch {
                     snackbarHostState.showSnackbar(

@@ -9,6 +9,7 @@ import com.russhwolf.settings.Settings
 import kotlinx.coroutines.launch
 import org.appsmith.flickcase.ERROR_MSG
 import org.appsmith.flickcase.Screen
+import org.appsmith.flickcase.model.cast.CastDetailsResponse
 import org.appsmith.flickcase.model.configuration.ConfigurationResponse
 import org.appsmith.flickcase.model.genre.Genre
 import org.appsmith.flickcase.model.moviedetails.MovieDetailsResponse
@@ -45,6 +46,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     val contentByMultipleGenre = mutableStateListOf<Movie?>()
     val searchedContent = mutableStateListOf<Movie?>(null)
     val contentDetails = mutableStateOf<MovieDetailsResponse?>(null)
+    val castDetails = mutableStateOf<CastDetailsResponse?>(null)
 
     fun getPopularGenres(): List<String> {
         return if (showMovies.value) listOf(
@@ -247,49 +249,74 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
                 query = query,
                 region = selectedRegion.value
             ).onSuccess { response ->
-                    response?.let { movieResponse ->
-                        client.searchContent(
-                            forMovies = false,
-                            query = query,
-                            region = selectedRegion.value
-                        ).onSuccess { tvResponse ->
-                                val movies = movieResponse.results?.filter { it?.vote_average != 0.0 }?.toMutableList() ?: mutableListOf()
-                                movies.addAll(tvResponse?.results?.filter { it?.vote_average != 0.0 } ?: listOf())
-                                searchedContent.addAll(movies.shuffled())
-                            }.onError {
-                                errorMessage.value = ERROR_MSG.API_ERROR.msg
-                            }
-                    } ?: run {
-                        errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
+                response?.let { movieResponse ->
+                    client.searchContent(
+                        forMovies = false,
+                        query = query,
+                        region = selectedRegion.value
+                    ).onSuccess { tvResponse ->
+                        val movies = movieResponse.results?.filter { it?.vote_average != 0.0 }
+                            ?.toMutableList() ?: mutableListOf()
+                        movies.addAll(
+                            tvResponse?.results?.filter { it?.vote_average != 0.0 } ?: listOf())
+                        searchedContent.addAll(movies.shuffled())
+                    }.onError {
+                        errorMessage.value = ERROR_MSG.API_ERROR.msg
                     }
-                }.onError {
-                    errorMessage.value = ERROR_MSG.API_ERROR.msg
+                } ?: run {
+                    errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
                 }
+            }.onError {
+                errorMessage.value = ERROR_MSG.API_ERROR.msg
+            }
         }.invokeOnCompletion {
             isLoading.value = false
         }
     }
 
-    fun getContentDetails(movieId: Int?) {
+    fun getContent(contentId: Int?) {
         viewModelScope.launch {
-            contentDetails.value = null
             isContentDetailsLoading.value = true
-            movieId?.let {
-                client.getContentDetails(
-                    forMovies = showMovies.value,
-                    movieId = it
-                ).onSuccess { response ->
-                        response?.let {
-                            contentDetails.value = it
-                        } ?: run {
-                            errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
-                        }
-                    }.onError {
-                        errorMessage.value = ERROR_MSG.API_ERROR.msg
-                    }
-            }
+            getCastDetails(contentId)
+            getContentDetails(contentId)
         }.invokeOnCompletion {
             isContentDetailsLoading.value = false
+        }
+    }
+
+    suspend fun getContentDetails(movieId: Int?) {
+        contentDetails.value = null
+        movieId?.let {
+            client.getContentDetails(
+                forMovies = showMovies.value,
+                movieId = it
+            ).onSuccess { response ->
+                response?.let {
+                    contentDetails.value = it
+                } ?: run {
+                    errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
+                }
+            }.onError {
+                errorMessage.value = ERROR_MSG.API_ERROR.msg
+            }
+        }
+    }
+
+    suspend fun getCastDetails(movieId: Int?) {
+        castDetails.value = null
+        movieId?.let {
+            client.getCast(
+                forMovies = showMovies.value,
+                contentId = it
+            ).onSuccess { response ->
+                response?.let {
+                    castDetails.value = it
+                } ?: run {
+                    errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
+                }
+            }.onError {
+                errorMessage.value = ERROR_MSG.API_ERROR.msg
+            }
         }
     }
 

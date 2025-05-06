@@ -191,7 +191,7 @@ fun HomeScreen(
                     showMovieLoader = homeViewModel.isContentDetailsLoading.value,
                     isLoadingAdditionalMovies = homeViewModel.isLoadingAdditionalMovies.value,
                     onMovieClicked = {
-                        homeViewModel.getContentDetails(it)
+                        homeViewModel.getContent(it)
                     },
                     loadMoreMovies = {
                         homeViewModel.loadMoreMovies(it)
@@ -256,7 +256,7 @@ fun HomeScreenContent(
                         top = 20.dp,
                         start = 20.dp
                     ),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary,
             )
 
