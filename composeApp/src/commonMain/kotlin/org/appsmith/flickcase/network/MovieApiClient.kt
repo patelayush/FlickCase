@@ -171,6 +171,20 @@ class MovieApiClient(
         }
     }
 
+    suspend fun getSimilarContent(
+        page:Int = 1,
+        forMovies: Boolean,
+        contentId: Int?
+    ): Result<MoviesResponse?, NetworkError> {
+        return try {
+            val response =
+                httpClient.get("$tmdbApiHost/${if (forMovies) "movie" else "tv"}/$contentId/similar?page=$page")
+            result<MoviesResponse?>(response)
+        } catch (e: Exception) {
+            checkForError(e)
+        }
+    }
+
     private fun checkForError(e: Exception): Result.Error<NetworkError> =
         if (e.message?.contains("Unable to resolve host") == true) {
             Result.Error(NetworkError.NO_INTERNET)

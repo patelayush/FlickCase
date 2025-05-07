@@ -1,7 +1,10 @@
 package org.appsmith.flickcase.viewmodel
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -38,6 +41,8 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     val nowPlayingMoviesPage = mutableStateOf(1)
     val trendingContent = mutableStateListOf<Movie?>()
     val trendingContentPage = mutableStateOf(1)
+    val similarContent = mutableStateListOf<Movie?>()
+    val similarContentPage = mutableStateOf(1)
     val configuration = mutableStateOf<ConfigurationResponse?>(null)
     val countries = mutableStateOf<List<String>?>(null)
     val contentGenres = mutableStateListOf<Genre>()
@@ -47,6 +52,8 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     val searchedContent = mutableStateListOf<Movie?>(null)
     val contentDetails = mutableStateOf<MovieDetailsResponse?>(null)
     val castDetails = mutableStateOf<CastDetailsResponse?>(null)
+
+    var openMovieDetailSheet = mutableStateOf(false)
 
     fun getPopularGenres(): List<String> {
         return if (showMovies.value) listOf(
@@ -276,16 +283,38 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
 
     fun getContent(contentId: Int?) {
         viewModelScope.launch {
+            openMovieDetailSheet.value = true
             isContentDetailsLoading.value = true
             getCastDetails(contentId)
+            similarContent.clear()
+            getSimilarContent(contentId)
             getContentDetails(contentId)
         }.invokeOnCompletion {
             isContentDetailsLoading.value = false
         }
     }
 
+    suspend fun getSimilarContent(contentId: Int?) {
+        contentId?.let {
+            client.getSimilarContent(
+                forMovies = showMovies.value,
+                contentId = it
+            ).onSuccess { response ->
+                response?.let { result ->
+                    if (result.results?.isEmpty() == true && result.page >= result.total_pages) {
+                        errorMessage.value = ERROR_MSG.REACHED_END.msg
+                    }
+                    similarContent.addAll(result.results ?: listOf())
+                } ?: run {
+                    errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
+                }
+            }.onError {
+                errorMessage.value = ERROR_MSG.API_ERROR.msg
+            }
+        }
+    }
+
     suspend fun getContentDetails(movieId: Int?) {
-        contentDetails.value = null
         movieId?.let {
             client.getContentDetails(
                 forMovies = showMovies.value,
@@ -366,6 +395,13 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
             }
         }.invokeOnCompletion {
             isLoadingAdditionalMovies.value = false
+        }
+    }
+
+    fun loadMoreSimilarMovies() {
+        viewModelScope.launch {
+            similarContentPage.value++
+            getSimilarContent(contentDetails.value?.id)
         }
     }
 }

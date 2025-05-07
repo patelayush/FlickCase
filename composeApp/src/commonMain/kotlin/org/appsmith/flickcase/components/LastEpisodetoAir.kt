@@ -34,76 +34,77 @@ fun LastEpisodeToAirSection(
     var height by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current
 
-    if(tvShow?.last_episode_to_air != null || tvShow?.next_episode_to_air != null){
-    Text(
-        text = if (tvShow.next_episode_to_air != null) "Current Season" else "Last Season",
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.tertiary,
-        style = MaterialTheme.typography.bodyLarge,
-        modifier = modifier,
-    )
-    val show = tvShow.next_episode_to_air ?: tvShow.last_episode_to_air
-    Card(
-        modifier = Modifier.padding(top = 10.dp).fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.background,
-        ),
-        elevation = CardDefaults.elevatedCardElevation(10.dp),
-        shape = RoundedCornerShape(15.dp)
-    ) {
-        Row {
-            FlickCaseImageLoader(
-                modifier = Modifier.width(120.dp).heightIn(min = 60.dp, max = height),
-                baseUrl = baseUrl ?: "",
-                path = tvShow.next_episode_to_air?.still_path?.takeIf { it.isNotBlank() } ?: tvShow.last_episode_to_air?.still_path ?: "",
-                shape = RectangleShape
-            )
-            Column(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .weight(1f)
-                    .onSizeChanged {
-                        density.run {
-                            height = it.height.toDp() + 45.dp
+    if (tvShow?.last_episode_to_air != null || tvShow?.next_episode_to_air != null) {
+        Text(
+            text = if (tvShow.next_episode_to_air != null) "Current Season" else "Last Season",
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.tertiary,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = modifier,
+        )
+        val show = tvShow.next_episode_to_air ?: tvShow.last_episode_to_air
+        Card(
+            modifier = Modifier.padding(top = 10.dp).fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.background,
+            ),
+            elevation = CardDefaults.elevatedCardElevation(10.dp),
+            shape = RoundedCornerShape(15.dp)
+        ) {
+            Row {
+                FlickCaseImageLoader(
+                    modifier = Modifier.width(120.dp).heightIn(min = 60.dp, max = height),
+                    baseUrl = baseUrl ?: "",
+                    path = tvShow.next_episode_to_air?.still_path?.takeIf { it.isNotBlank() }
+                        ?: tvShow.last_episode_to_air?.still_path ?: "",
+                    shape = RectangleShape
+                )
+                Column(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .weight(1f)
+                        .onSizeChanged {
+                            density.run {
+                                height = it.height.toDp() + 45.dp
+                            }
+                        },
+                ) {
+                    Text(
+                        text = "Season ${show?.season_number ?: ""}",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Row {
+                        if (show?.air_date != null) {
+                            Text(
+                                text = show.air_date.takeIf { it.isNotBlank() }
+                                    ?.substring(startIndex = 0, endIndex = 4) ?: "",
+                                color = MaterialTheme.colorScheme.onBackground,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Text(
+                                text = " | ",
+                                color = MaterialTheme.colorScheme.onBackground,
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
-                    },
-            ) {
-                Text(
-                    text = "Season ${show?.season_number ?: ""}",
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Row {
-                    if (show?.air_date != null) {
-                        Text(
-                            text = show.air_date.takeIf { it.isNotBlank() }
-                                ?.substring(startIndex = 0, endIndex = 4) ?: "",
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = " | ",
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                        if (tvShow?.seasons?.lastOrNull()?.episode_count != null) {
+                            Text(
+                                text = tvShow.seasons.lastOrNull()?.episode_count.toString() + " episodes",
+                                color = MaterialTheme.colorScheme.onBackground,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
                     }
-                    if (tvShow?.seasons?.lastOrNull()?.episode_count != null) {
-                        Text(
-                            text = tvShow.seasons.lastOrNull()?.episode_count.toString() + " episodes",
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
+                    ExpandableText(
+                        text = seasonOverview ?: "",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 10.dp)
+                    )
                 }
-                ExpandableText(
-                    text = seasonOverview ?: "",
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
             }
-        }
         }
     }
 }
