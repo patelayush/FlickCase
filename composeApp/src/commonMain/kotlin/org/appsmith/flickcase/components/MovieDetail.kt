@@ -4,13 +4,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -51,6 +55,7 @@ fun MovieDetailSheet(
     if (openBottomSheet) {
         ModalBottomSheet(
             modifier = Modifier
+                .padding(top = ScaffoldDefaults.contentWindowInsets.asPaddingValues().calculateTopPadding())
                 .widthIn(max = 600.dp),
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
             onDismissRequest = {
@@ -59,10 +64,11 @@ fun MovieDetailSheet(
             },
             sheetState = bottomSheetState,
         ) {
-            Box(Modifier.padding(bottom = 56.dp)) {
+            Box {
                 Column(
                     modifier = Modifier
                         .padding(horizontal = 15.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
                     FlickCaseImageLoader(
                         modifier = Modifier
@@ -75,7 +81,11 @@ fun MovieDetailSheet(
                     Column(Modifier.padding(bottom = 30.dp)) {
                         Text(
                             modifier = Modifier.padding(top = 20.dp),
-                            text = movie?.title ?: movie?.name ?: "",
+                            text = "${movie?.title ?: movie?.name ?: ""} (${
+                                (movie?.release_date?.takeIf { it.isNotBlank() }
+                                    ?: movie?.first_air_date)?.takeIf { it.isNotBlank() }
+                                    ?.substring(startIndex = 0, endIndex = 4) ?: ""
+                            })",
                             style = MaterialTheme.typography.headlineMedium,
                             color = MaterialTheme.colorScheme.onBackground
                         )
@@ -89,7 +99,7 @@ fun MovieDetailSheet(
                             )
                         }
                         GenreSection(
-                            modifier = Modifier.padding(top = 5.dp),
+                            modifier = Modifier.padding(top = 10.dp),
                             genres = movie?.genres ?: listOf()
                         )
                         Row(
@@ -100,14 +110,12 @@ fun MovieDetailSheet(
                                 modifier = Modifier.weight(1f),
                             ) {
                                 Text(
-                                    text = "${if (movie?.first_air_date != null) "Released" else movie?.status ?: ""} in: ",
+                                    text = "Status: ",
                                     color = MaterialTheme.colorScheme.onBackground,
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                                 Text(
-                                    text = (movie?.release_date?.takeIf { it.isNotBlank() }
-                                        ?: movie?.first_air_date)?.takeIf { it.isNotBlank() }
-                                        ?.substring(startIndex = 0, endIndex = 4) ?: "",
+                                    text = movie?.status ?: "",
                                     fontWeight = FontWeight.SemiBold,
                                     color = MaterialTheme.colorScheme.tertiary,
                                     style = MaterialTheme.typography.bodyLarge
@@ -140,6 +148,14 @@ fun MovieDetailSheet(
                                 modifier = Modifier.padding(top = 20.dp),
                                 cast = cast?.cast,
                                 baseUrl = configuration?.images?.secure_base_url
+                            )
+                        }
+                        if (movie?.last_episode_to_air != null) {
+                            LastEpisodeToAirSection(
+                                modifier = Modifier.padding(top = 20.dp),
+                                tvShow = movie,
+                                baseUrl = configuration?.images?.secure_base_url,
+                                seasonOverview = movie.seasons?.lastOrNull()?.overview
                             )
                         }
                     }

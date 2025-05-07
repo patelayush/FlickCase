@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -59,7 +61,8 @@ fun MovieCard(
         content = {
             Column {
                 FlickCaseImageLoader(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxWidth()
+                        .height(250.dp),
                     baseUrl = configuration?.images?.secure_base_url ?: "",
                     path = movie?.poster_path?.takeIf { it.isNotBlank() } ?: movie?.backdrop_path ?: "",
                     voteAverage = ((movie?.vote_average ?: 0.0) * 10).roundToInt(),

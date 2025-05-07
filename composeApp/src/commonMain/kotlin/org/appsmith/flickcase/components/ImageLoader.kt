@@ -3,7 +3,6 @@ package org.appsmith.flickcase.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -20,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,12 +33,12 @@ fun FlickCaseImageLoader(
     path: String,
     voteAverage: Int? = null,
     additionalLoader: Boolean = false,
+    shape: Shape? = RoundedCornerShape(15.dp)
 ) {
     var isImageLoading by remember { mutableStateOf(false) }
     Box(
         modifier = modifier
-            .fillMaxWidth()
-            .height(250.dp),
+            .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
         AsyncImage(
@@ -56,9 +56,14 @@ fun FlickCaseImageLoader(
                 isImageLoading = false
                 println(it.result.throwable.message)
             },
-            modifier = Modifier.clip(
-                RoundedCornerShape(15.dp)
-            ),
+            modifier = Modifier
+                .then(
+                    if (shape != null) {
+                        Modifier.clip(shape)
+                    } else {
+                        Modifier
+                    }
+                ),
         )
 
         if (isImageLoading || additionalLoader) {
