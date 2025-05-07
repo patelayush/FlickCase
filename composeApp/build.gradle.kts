@@ -83,6 +83,7 @@ kotlin {
             implementation(libs.coil.ktor)
             implementation(libs.androidx.viewmodel.compose)
             implementation(libs.russhwolf.mutiplatform.settings)
+            implementation(libs.material.icons.core)
 
             //ktor
             implementation(libs.ktor.client.core)

@@ -301,7 +301,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
                 contentId = it
             ).onSuccess { response ->
                 response?.let { result ->
-                    if (result.results?.isEmpty() == true && result.page >= result.total_pages) {
+                    if (result.results?.isEmpty() == true && (result.page >= result.total_pages) && result.page != 1) {
                         errorMessage.value = ERROR_MSG.REACHED_END.msg
                     }
                     similarContent.addAll(result.results ?: listOf())
