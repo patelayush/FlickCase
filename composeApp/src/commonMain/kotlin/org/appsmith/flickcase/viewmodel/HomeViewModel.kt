@@ -49,7 +49,12 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     val selectedGenres = mutableStateListOf<Genre>()
     val contentByGenre = mutableStateListOf<MoviesByGenre>()
     val contentByMultipleGenre = mutableStateListOf<Movie?>()
+    val contentByMultipleGenrePage = mutableStateOf(1)
+    val reachedEndOfMoviesByMultipleGenre = mutableStateOf(false)
     val searchedContent = mutableStateListOf<Movie?>(null)
+    val searchedContentMoviePage = mutableStateOf(1)
+    val searchedContentTvPage = mutableStateOf(1)
+    val reachedEndOfSearchedContent = mutableStateOf(false)
     val contentDetails = mutableStateOf<MovieDetailsResponse?>(null)
     val castDetails = mutableStateOf<CastDetailsResponse?>(null)
 
@@ -175,7 +180,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
         client.getNowPlayingMovies(page = nowPlayingMoviesPage.value, region = selectedRegion.value)
             .onSuccess { response ->
                 response?.let {
-                    if (it.results?.isEmpty() == true && it.page >= it.total_pages) {
+                    if (it.results?.isEmpty() == true && it.page >= it.total_pages && it.page != 1) {
                         errorMessage.value = ERROR_MSG.REACHED_END.msg
                     }
                     nowPlayingMovies.addAll(it.results ?: listOf())
@@ -230,14 +235,18 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
 
     fun getMoviesByMultipleGenres() {
         viewModelScope.launch {
+            isLoading.value = true
             client.searchMoviesByMutlipleGenres(
+                page = contentByMultipleGenrePage.value,
                 forMovies = showMovies.value,
                 genres = selectedGenres.map { it.id ?: 0 },
                 region = selectedRegion.value
             )
                 .onSuccess { response ->
                     response?.let {
-                        contentByMultipleGenre.clear()
+                        if (it.results?.isEmpty() == true || it.page >= it.total_pages) {
+                            reachedEndOfMoviesByMultipleGenre.value = true
+                        }
                         contentByMultipleGenre.addAll(response.results ?: listOf())
                     } ?: run {
                         errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
@@ -245,28 +254,34 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
                 }.onError {
                     errorMessage.value = ERROR_MSG.API_ERROR.msg
                 }
+        }.invokeOnCompletion {
+            isLoading.value = false
         }
     }
 
     fun searchContent(query: String) {
         viewModelScope.launch {
             isLoading.value = true
-            searchedContent.clear()
             client.searchContent(
+                page = searchedContentMoviePage.value,
                 forMovies = true,
                 query = query,
                 region = selectedRegion.value
             ).onSuccess { response ->
                 response?.let { movieResponse ->
                     client.searchContent(
+                        page = searchedContentTvPage.value,
                         forMovies = false,
                         query = query,
                         region = selectedRegion.value
                     ).onSuccess { tvResponse ->
                         val movies = movieResponse.results?.filter { it?.vote_average != 0.0 }
                             ?.toMutableList() ?: mutableListOf()
-                        movies.addAll(
-                            tvResponse?.results?.filter { it?.vote_average != 0.0 } ?: listOf())
+                        val tvshows = tvResponse?.results?.filter { it?.vote_average != 0.0 } ?: listOf()
+                        movies.addAll(tvshows)
+                        if(movies.isEmpty() && tvshows.isEmpty()){
+                            reachedEndOfSearchedContent.value = true
+                        }
                         searchedContent.addAll(movies.shuffled())
                     }.onError {
                         errorMessage.value = ERROR_MSG.API_ERROR.msg
@@ -280,6 +295,19 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
         }.invokeOnCompletion {
             isLoading.value = false
         }
+    }
+
+
+    fun resetSearchContentState() {
+        searchedContentMoviePage.value = 1
+        searchedContentTvPage.value = 1
+        searchedContent.clear()
+    }
+
+    fun loadMoreSearchedContent(query: String) {
+        searchedContentMoviePage.value++
+        searchedContentTvPage.value++
+        searchContent(query = query)
     }
 
     fun getContent(contentId: Int?) {
@@ -404,6 +432,17 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
             similarContentPage.value++
             getSimilarContent(contentDetails.value?.id)
         }
+    }
+
+    fun loadMoreMoviesByMultipleGenres() {
+        contentByMultipleGenrePage.value++
+        getMoviesByMultipleGenres()
+    }
+
+    fun resetContentByMultipleGenre() {
+        contentByMultipleGenre.clear()
+        contentByMultipleGenrePage.value = 1
+        reachedEndOfMoviesByMultipleGenre.value = false
     }
 }
 

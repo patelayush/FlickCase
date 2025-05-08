@@ -124,6 +124,7 @@ class MovieApiClient(
     }
 
     suspend fun searchMoviesByMutlipleGenres(
+        page:Int = 1,
         forMovies: Boolean = true,
         language: String = "en-US",
         region: String = "US",
@@ -132,8 +133,8 @@ class MovieApiClient(
         val genreString = genres.joinToString(",")
         return try {
             val response = httpClient.get(
-                if(forMovies) "$tmdbApiHost/discover/movie?include_adult=false&include_video=false&region=$region&language=$language&with_origin_country=$region&page=1&sort_by=vote_count.desc&with_genres=$genreString"
-                else "$tmdbApiHost/discover/tv?include_adult=false&include_video=false&region=$region&language=$language&with_origin_country=$region&page=1&sort_by=vote_count.desc&with_genres=$genreString"
+                if(forMovies) "$tmdbApiHost/discover/movie?include_adult=false&include_video=false&region=$region&language=$language&with_origin_country=$region&page=$page&sort_by=vote_count.desc&with_genres=$genreString"
+                else "$tmdbApiHost/discover/tv?include_adult=false&include_video=false&region=$region&language=$language&with_origin_country=$region&page=$page&sort_by=vote_count.desc&with_genres=$genreString"
             )
             result<MoviesResponse?>(response)
         } catch (e: Exception) {
@@ -142,6 +143,7 @@ class MovieApiClient(
     }
 
     suspend fun searchContent(
+        page: Int = 1,
         forMovies: Boolean = true,
         language: String = "en-US",
         region: String = "US",
@@ -149,8 +151,8 @@ class MovieApiClient(
     ): Result<MoviesResponse?, NetworkError> {
         return try {
             val response = httpClient.get(
-                if(forMovies) "$tmdbApiHost/search/movie?query=$query&include_adult=false&include_video=false&region=$region&language=$language&with_origin_country=$region&page=1&sort_by=vote_count.desc"
-                else "$tmdbApiHost/search/tv?query=$query&include_adult=false&include_video=false&region=$region&language=$language&with_origin_country=$region&page=1&sort_by=vote_count.desc"
+                if(forMovies) "$tmdbApiHost/search/movie?query=$query&include_adult=false&include_video=false&region=$region&language=$language&with_origin_country=$region&page=$page&sort_by=vote_count.desc"
+                else "$tmdbApiHost/search/tv?query=$query&include_adult=false&include_video=false&region=$region&language=$language&with_origin_country=$region&page=$page&sort_by=vote_count.desc"
             )
             result<MoviesResponse?>(response)
         } catch (e: Exception) {

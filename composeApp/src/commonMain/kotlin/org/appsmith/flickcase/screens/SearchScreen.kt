@@ -1,6 +1,7 @@
 package org.appsmith.flickcase.screens
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,9 +20,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +33,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import org.appsmith.flickcase.components.SearchBar
 import org.appsmith.flickcase.components.MovieCard
 import org.appsmith.flickcase.network.MovieApiClient
@@ -42,6 +47,23 @@ fun SearchScreen(
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var onTyping by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
+    var showSpinner by rememberSaveable { mutableStateOf(false) }
+
+    if(!scrollState.canScrollForward && !homeViewModel.searchedContent.isEmpty() && !homeViewModel.reachedEndOfSearchedContent.value){
+        showSpinner = true
+    }
+    LaunchedEffect(homeViewModel.isLoading.value){
+        if(!homeViewModel.isLoading.value){
+            showSpinner = false
+        }
+    }
+    LaunchedEffect(showSpinner){
+        if(showSpinner){
+            homeViewModel.loadMoreSearchedContent(searchQuery)
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(
@@ -59,15 +81,17 @@ fun SearchScreen(
                     onTyping = true
                 },
                 onSearch = { query ->
+                    homeViewModel.resetSearchContentState()
                     homeViewModel.searchContent(query)
+                    coroutineScope.launch {
+                        scrollState.animateScrollTo(0, tween(100))
+                    }
                     onTyping = false
                 }
             )
             if (homeViewModel.searchedContent.isNotEmpty() && searchQuery.isNotBlank() && !onTyping) {
                 Column(
-                    Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(vertical = 20.dp)
+                    Modifier.padding(top = 20.dp)
                 ) {
                     Text(
                         text = buildAnnotatedString {
@@ -86,28 +110,37 @@ fun SearchScreen(
                                 append(searchQuery)
                             }
                         },
-                        style = MaterialTheme.typography.headlineMedium
+                        style = MaterialTheme.typography.headlineSmall
                     )
-                    FlowRow(
-                        modifier = Modifier.padding(top = 20.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(15.dp)
-                    ) {
-                        homeViewModel.searchedContent.forEach {
-                            MovieCard(
-                                modifier = Modifier
-                                    .width(180.dp)
-                                    .height(200.dp),
-                                movie = it,
-                                configuration = homeViewModel.configuration.value,
-                                showImageLoader = homeViewModel.isContentDetailsLoading.value,
-                                onCardClick = {
-                                    homeViewModel.getContent(it)
-                                }
+                    Column(Modifier.padding(top = 20.dp).fillMaxWidth().verticalScroll(scrollState)) {
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalArrangement = Arrangement.spacedBy(15.dp)
+                        ) {
+                            homeViewModel.searchedContent.forEach {
+                                MovieCard(
+                                    modifier = Modifier
+                                        .width(180.dp)
+                                        .height(200.dp),
+                                    movie = it,
+                                    configuration = homeViewModel.configuration.value,
+                                    showImageLoader = homeViewModel.isContentDetailsLoading.value,
+                                    onCardClick = {
+                                        homeViewModel.getContent(it)
+                                    }
+                                )
+                            }
+                        }
+                        if(showSpinner){
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.tertiary,
+                                strokeWidth = 5.dp,
+                                modifier = Modifier.padding(top = 15.dp).size(50.dp)
                             )
                         }
+                        Spacer(Modifier.height(30.dp))
                     }
-                    Spacer(Modifier.height(30.dp))
                 }
             } else if (homeViewModel.searchedContent.isEmpty() && searchQuery.isNotBlank() && !homeViewModel.isLoading.value) {
                 Column(
@@ -139,7 +172,7 @@ fun SearchScreen(
                 }
             }
         }
-        if (homeViewModel.isLoading.value) {
+        if (homeViewModel.isLoading.value && homeViewModel.searchedContent.isEmpty()) {
             Box(Modifier.fillMaxSize()) {
                 CircularProgressIndicator(
                     color = MaterialTheme.colorScheme.tertiary,
