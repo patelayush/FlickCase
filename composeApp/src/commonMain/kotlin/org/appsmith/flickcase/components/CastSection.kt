@@ -43,7 +43,7 @@ fun CastSection(
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.onBackground,
         style = MaterialTheme.typography.bodyLarge,
-        modifier = modifier,
+        modifier = modifier.padding(horizontal = 15.dp),
     )
 
     Row(

@@ -49,10 +49,10 @@ fun SimilarMoviesSection(modifier: Modifier, movies: List<Movie?>, configuration
 
     Text(
         text = "More like this",
+        modifier = modifier.padding(horizontal = 15.dp),
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.tertiary,
         style = MaterialTheme.typography.titleMedium,
-        modifier = modifier,
     )
 
     LazyRow(

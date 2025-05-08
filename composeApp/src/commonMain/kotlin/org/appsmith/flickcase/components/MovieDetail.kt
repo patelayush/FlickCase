@@ -69,7 +69,7 @@ fun MovieDetailSheet(
     ModalBottomSheet(
         modifier = Modifier
             .statusBarsPadding()
-            .widthIn(max = 600.dp),
+            .widthIn(max = 700.dp),
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         onDismissRequest = {
             onDismissRequest()
@@ -95,13 +95,13 @@ fun MovieDetailSheet(
                     FlickCaseImageLoader(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(250.dp),
+                            .height(275.dp),
                         baseUrl = configuration?.images?.secure_base_url ?: "",
                         path = movie?.backdrop_path?.takeIf { it.isNotBlank() }
                             ?: movie?.poster_path ?: "",
                         shape = RectangleShape
                     )
-                    Column(Modifier.padding(bottom = 30.dp)) {
+                    Column(Modifier.padding(bottom = 60.dp)) {
                         Text(
                             modifier = Modifier.padding(top = 20.dp).padding(horizontal = 15.dp),
                             text = "${movie?.title ?: movie?.name ?: ""} (${
