@@ -65,6 +65,10 @@ fun SimilarMoviesSection(modifier: Modifier, movies: List<Movie?>, configuration
         ) { index, movie ->
             MovieCard(
                 modifier = Modifier
+                    .padding(
+                        start = if(index == 0) 15.dp else 0.dp,
+                        end = if(index == movies.lastIndex) 15.dp else 0.dp
+                    )
                     .width(160.dp)
                     .height(200.dp),
                 movie = movie,

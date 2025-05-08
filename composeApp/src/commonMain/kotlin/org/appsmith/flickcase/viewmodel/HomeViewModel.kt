@@ -54,6 +54,7 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
     val castDetails = mutableStateOf<CastDetailsResponse?>(null)
 
     var openMovieDetailSheet = mutableStateOf(false)
+    var showRegionSelector = mutableStateOf(false)
 
     fun getPopularGenres(): List<String> {
         return if (showMovies.value) listOf(

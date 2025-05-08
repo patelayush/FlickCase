@@ -27,6 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -74,7 +75,7 @@ fun MovieDetailSheet(
             onDismissRequest()
         },
         sheetState = bottomSheetState,
-        scrimColor = MaterialTheme.colorScheme.background,
+        scrimColor = Color.Transparent,
         dragHandle = null,
         tonalElevation = 0.dp,
     ) {
@@ -100,9 +101,9 @@ fun MovieDetailSheet(
                             ?: movie?.poster_path ?: "",
                         shape = RectangleShape
                     )
-                    Column(Modifier.padding(horizontal = 15.dp).padding(bottom = 30.dp)) {
+                    Column(Modifier.padding(bottom = 30.dp)) {
                         Text(
-                            modifier = Modifier.padding(top = 20.dp),
+                            modifier = Modifier.padding(top = 20.dp).padding(horizontal = 15.dp),
                             text = "${movie?.title ?: movie?.name ?: ""} (${
                                 (movie?.release_date?.takeIf { it.isNotBlank() }
                                     ?: movie?.first_air_date)?.takeIf { it.isNotBlank() }
@@ -113,7 +114,7 @@ fun MovieDetailSheet(
                         )
                         if (!movie?.tagline.isNullOrBlank()) {
                             Text(
-                                modifier = Modifier.padding(),
+                                modifier = Modifier.padding(horizontal = 15.dp),
                                 text = movie?.tagline ?: "",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontStyle = FontStyle.Italic,
@@ -121,11 +122,11 @@ fun MovieDetailSheet(
                             )
                         }
                         GenreSection(
-                            modifier = Modifier.padding(top = 10.dp),
+                            modifier = Modifier.padding(horizontal = 15.dp).padding(top = 10.dp),
                             genres = movie?.genres ?: listOf()
                         )
                         Row(
-                            modifier = Modifier.padding(top = 15.dp).fillMaxWidth(),
+                            modifier = Modifier.padding(horizontal = 15.dp).padding(top = 15.dp).fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Row(
@@ -159,7 +160,7 @@ fun MovieDetailSheet(
                         }
                         if (!movie?.overview.isNullOrBlank()) {
                             ExpandableText(
-                                modifier = Modifier.padding(top = 15.dp),
+                                modifier = Modifier.padding(horizontal = 15.dp).padding(top = 15.dp),
                                 text = movie?.overview ?: "",
                                 color = MaterialTheme.colorScheme.onBackground,
                                 style = MaterialTheme.typography.bodyLarge
@@ -174,7 +175,7 @@ fun MovieDetailSheet(
                         }
                         if (movie?.last_episode_to_air != null) {
                             LastEpisodeToAirSection(
-                                modifier = Modifier.padding(top = 20.dp),
+                                modifier = Modifier.padding(horizontal = 15.dp).padding(top = 20.dp),
                                 tvShow = movie,
                                 baseUrl = configuration?.images?.secure_base_url,
                                 seasonOverview = movie.seasons?.lastOrNull()?.overview

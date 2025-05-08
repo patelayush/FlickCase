@@ -53,9 +53,13 @@ fun CastSection(
         horizontalArrangement = Arrangement.spacedBy(15.dp),
         verticalAlignment = Alignment.Top
     ) {
-        cast?.forEach {
+        cast?.forEachIndexed { index, it ->
             Column(
                 modifier = Modifier
+                    .padding(
+                        start = if(index == 0) 15.dp else 0.dp,
+                        end = if(index == cast.lastIndex) 15.dp else 0.dp
+                    )
                     .widthIn(max = 140.dp)
                     .onSizeChanged {
                         density.run {

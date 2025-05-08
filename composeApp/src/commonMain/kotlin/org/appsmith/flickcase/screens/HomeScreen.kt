@@ -66,8 +66,6 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel
 ) {
-    var showRegionSelector by rememberSaveable { mutableStateOf(false) }
-
     LaunchedEffect(Unit) {
         if (homeViewModel.trendingContent.isEmpty()) {
             homeViewModel.isLoading.value = true
@@ -98,7 +96,7 @@ fun HomeScreen(
                     )
                 }
                 RangePickerIcon {
-                    showRegionSelector = true
+                    homeViewModel.showRegionSelector.value = true
                 }
             }
             Row(
@@ -202,15 +200,15 @@ fun HomeScreen(
     }
 
     RegionPicker(
-        showDialog = showRegionSelector,
+        showDialog = homeViewModel.showRegionSelector.value,
         regions = homeViewModel.countries.value ?: listOf(),
         selectedRegion = homeViewModel.selectedRegion.value,
         onDismiss = {
-            showRegionSelector = false
+            homeViewModel.showRegionSelector.value = false
         },
         onRegionSelected = {
             homeViewModel.setSelectedRegion(it)
-            showRegionSelector = false
+            homeViewModel.showRegionSelector.value = false
         }
     )
 }
