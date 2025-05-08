@@ -1,4 +1,4 @@
-rootProject.name = "Filmestry"
+rootProject.name = "FlickCase"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

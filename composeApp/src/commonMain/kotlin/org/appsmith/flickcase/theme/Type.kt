@@ -5,10 +5,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import filmestry.composeapp.generated.resources.Res
-import filmestry.composeapp.generated.resources.dm_serif
-import filmestry.composeapp.generated.resources.nunito_sans
-import filmestry.composeapp.generated.resources.roboto_slab
+import flickcase.composeapp.generated.resources.Res
+import flickcase.composeapp.generated.resources.dm_serif
+import flickcase.composeapp.generated.resources.nunito_sans
+import flickcase.composeapp.generated.resources.roboto_slab
 import org.jetbrains.compose.resources.Font
 
 @Composable

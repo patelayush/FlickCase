@@ -22,8 +22,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import filmestry.composeapp.generated.resources.Res
-import filmestry.composeapp.generated.resources.app_icon
+import flickcase.composeapp.generated.resources.Res
+import flickcase.composeapp.generated.resources.app_icon
 import org.appsmith.flickcase.APP_NAME
 import org.appsmith.flickcase.BuildKonfig
 import org.jetbrains.compose.resources.painterResource

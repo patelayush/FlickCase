@@ -27,8 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import filmestry.composeapp.generated.resources.Res
-import filmestry.composeapp.generated.resources.ic_check
+import flickcase.composeapp.generated.resources.Res
+import flickcase.composeapp.generated.resources.ic_check
 import org.jetbrains.compose.resources.painterResource
 
 @Composable

@@ -45,7 +45,7 @@ platform :android do
   lane :web do
     gradle(task: "wasmJsBrowserDistribution")
     copy
-    gradle(task: ":composeApp:wasmJsBrowserDevelopmentRun")
+    gradle(task: ":composeApp:wasmJsBrowserDevelopmentRun --exclude-task wasmJsBrowserTest")
   end
 
   desc "Runs all the tests"

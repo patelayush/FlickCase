@@ -41,9 +41,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import filmestry.composeapp.generated.resources.Res
-import filmestry.composeapp.generated.resources.app_icon
-import filmestry.composeapp.generated.resources.ic_language
+import flickcase.composeapp.generated.resources.Res
+import flickcase.composeapp.generated.resources.app_icon
+import flickcase.composeapp.generated.resources.ic_language
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
