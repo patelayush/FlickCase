@@ -26,6 +26,13 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.memory.MemoryCache
+import coil3.request.CachePolicy
+import coil3.request.crossfade
+import coil3.util.DebugLogger
 import kotlinx.coroutines.launch
 import org.appsmith.flickcase.components.BottomNavigationBar
 import org.appsmith.flickcase.components.MovieDetailSheet
@@ -35,6 +42,7 @@ import org.appsmith.flickcase.screens.GenresScreen
 import org.appsmith.flickcase.screens.HomeScreen
 import org.appsmith.flickcase.screens.SearchScreen
 import org.appsmith.flickcase.screens.WelcomeScreen
+import org.appsmith.flickcase.shared.getAsyncImageLoader
 import org.appsmith.flickcase.theme.AlwaysDarkTheme
 import org.appsmith.flickcase.viewmodel.HomeViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -49,6 +57,11 @@ fun App(
     val scope = rememberCoroutineScope()
 
     AlwaysDarkTheme {
+        // to enable caching through coil. This will set context for the imageLoader factory
+        setSingletonImageLoaderFactory { context ->
+            getAsyncImageLoader(context)
+        }
+
         Scaffold(
             modifier = Modifier
                 .blur(if (homeViewModel.openMovieDetailSheet.value || homeViewModel.showRegionSelector.value) 4.dp else 0.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
@@ -155,8 +168,6 @@ fun App(
                     homeViewModel.errorMessage.value = ""
                 }
             }
-
-
         }
     }
 }
