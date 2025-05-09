@@ -45,12 +45,10 @@ fun GenresScreen(
     var showSpinner by rememberSaveable { mutableStateOf(false) }
     if(!scrollState.canScrollForward && !homeViewModel.contentByMultipleGenre.isEmpty() && !homeViewModel.reachedEndOfMoviesByMultipleGenre.value){
        showSpinner = true
+    } else {
+        showSpinner = false
     }
-    LaunchedEffect(homeViewModel.isLoading.value){
-        if(!homeViewModel.isLoading.value){
-            showSpinner = false
-        }
-    }
+
     LaunchedEffect(showSpinner){
         if(showSpinner){
             homeViewModel.loadMoreMoviesByMultipleGenres()
@@ -74,8 +72,8 @@ fun GenresScreen(
                     }
                 },
                 onGenreRemoved = {
+                    homeViewModel.resetContentByMultipleGenre()
                     if (homeViewModel.selectedGenres.isNotEmpty()) {
-                        homeViewModel.resetContentByMultipleGenre()
                         homeViewModel.getMoviesByMultipleGenres()
                         coroutineScope.launch {
                             scrollState.animateScrollTo(0, tween())

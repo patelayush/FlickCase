@@ -1,10 +1,7 @@
 package org.appsmith.flickcase.viewmodel
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -241,19 +238,18 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
                 forMovies = showMovies.value,
                 genres = selectedGenres.map { it.id ?: 0 },
                 region = selectedRegion.value
-            )
-                .onSuccess { response ->
-                    response?.let {
-                        if (it.results?.isEmpty() == true || it.page >= it.total_pages) {
-                            reachedEndOfMoviesByMultipleGenre.value = true
-                        }
-                        contentByMultipleGenre.addAll(response.results ?: listOf())
-                    } ?: run {
-                        errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
+            ).onSuccess { response ->
+                response?.let {
+                    if (it.results?.isEmpty() == true || it.page >= it.total_pages) {
+                        reachedEndOfMoviesByMultipleGenre.value = true
                     }
-                }.onError {
-                    errorMessage.value = ERROR_MSG.API_ERROR.msg
+                    contentByMultipleGenre.addAll(response.results ?: listOf())
+                } ?: run {
+                    errorMessage.value = ERROR_MSG.EMPTY_RESPONSE.msg
                 }
+            }.onError {
+                errorMessage.value = ERROR_MSG.API_ERROR.msg
+            }
         }.invokeOnCompletion {
             isLoading.value = false
         }
@@ -277,9 +273,10 @@ class HomeViewModel(private val client: MovieApiClient) : ViewModel() {
                     ).onSuccess { tvResponse ->
                         val movies = movieResponse.results?.filter { it?.vote_average != 0.0 }
                             ?.toMutableList() ?: mutableListOf()
-                        val tvshows = tvResponse?.results?.filter { it?.vote_average != 0.0 } ?: listOf()
+                        val tvshows =
+                            tvResponse?.results?.filter { it?.vote_average != 0.0 } ?: listOf()
                         movies.addAll(tvshows)
-                        if(movies.isEmpty() && tvshows.isEmpty()){
+                        if (movies.isEmpty() && tvshows.isEmpty()) {
                             reachedEndOfSearchedContent.value = true
                         }
                         searchedContent.addAll(movies.shuffled())

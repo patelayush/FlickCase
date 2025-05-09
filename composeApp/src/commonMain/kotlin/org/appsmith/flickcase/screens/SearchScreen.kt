@@ -39,7 +39,6 @@ import org.appsmith.flickcase.components.MovieCard
 import org.appsmith.flickcase.network.MovieApiClient
 import org.appsmith.flickcase.viewmodel.HomeViewModel
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SearchScreen(
     modifier: Modifier = Modifier,
@@ -53,12 +52,10 @@ fun SearchScreen(
 
     if(!scrollState.canScrollForward && !homeViewModel.searchedContent.isEmpty() && !homeViewModel.reachedEndOfSearchedContent.value){
         showSpinner = true
+    } else {
+        showSpinner = false
     }
-    LaunchedEffect(homeViewModel.isLoading.value){
-        if(!homeViewModel.isLoading.value){
-            showSpinner = false
-        }
-    }
+
     LaunchedEffect(showSpinner){
         if(showSpinner){
             homeViewModel.loadMoreSearchedContent(searchQuery)
@@ -112,7 +109,7 @@ fun SearchScreen(
                         },
                         style = MaterialTheme.typography.headlineSmall
                     )
-                    Column(Modifier.padding(top = 20.dp).fillMaxWidth().verticalScroll(scrollState)) {
+                    Column(Modifier.padding(top = 20.dp).fillMaxWidth().verticalScroll(scrollState), horizontalAlignment = Alignment.CenterHorizontally) {
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -136,7 +133,7 @@ fun SearchScreen(
                             CircularProgressIndicator(
                                 color = MaterialTheme.colorScheme.tertiary,
                                 strokeWidth = 5.dp,
-                                modifier = Modifier.padding(top = 15.dp).size(50.dp)
+                                modifier = Modifier.padding(top = 15.dp).size(25.dp)
                             )
                         }
                         Spacer(Modifier.height(30.dp))
@@ -173,13 +170,11 @@ fun SearchScreen(
             }
         }
         if (homeViewModel.isLoading.value && homeViewModel.searchedContent.isEmpty()) {
-            Box(Modifier.fillMaxSize()) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.tertiary,
-                    strokeWidth = 5.dp,
-                    modifier = Modifier.align(Alignment.Center).size(50.dp)
-                )
-            }
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.tertiary,
+                strokeWidth = 5.dp,
+                modifier = Modifier.align(Alignment.Center).size(50.dp)
+            )
         }
     }
 }
