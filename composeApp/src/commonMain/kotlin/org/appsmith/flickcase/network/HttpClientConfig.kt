@@ -21,14 +21,6 @@ import org.appsmith.flickcase.network.util.NetworkError
 // Docs - https://www.youtube.com/watch?v=Z1WoLYF-b14
 fun createHttpClient(engine: HttpClientEngine): HttpClient {
     return HttpClient(engine) {
-        install(Logging) {
-            level = LogLevel.ALL
-            logger = object : io.ktor.client.plugins.logging.Logger {
-                override fun log(message: String) {
-                    println("noddy $message")
-                }
-            }
-        }
         install(ContentNegotiation) {
             json(
                 Json {
