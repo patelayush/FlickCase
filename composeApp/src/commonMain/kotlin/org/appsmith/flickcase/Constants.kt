@@ -1,5 +1,7 @@
 package org.appsmith.flickcase
 
+import androidx.compose.ui.unit.dp
+
 const val APP_NAME = "FlickCase"
 const val tmdbApiHost = "https://api.themoviedb.org/3"
 
@@ -17,7 +19,6 @@ enum class ERROR_MSG(val msg: String) {
     API_ERROR("API Error")
 }
 
-
 // screens
 enum class Screen(val screenName: String, val route: String) {
     Welcome("Welcome", "welcome"),
@@ -26,3 +27,5 @@ enum class Screen(val screenName: String, val route: String) {
     Genres("Genres", "genres"),
     About("About", "about"),
 }
+
+val bottomContentPadding = 40.dp

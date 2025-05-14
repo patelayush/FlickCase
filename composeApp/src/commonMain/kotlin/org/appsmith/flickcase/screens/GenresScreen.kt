@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.appsmith.flickcase.bottomContentPadding
 import org.appsmith.flickcase.components.GenreRow
 import org.appsmith.flickcase.components.MovieCard
 import org.appsmith.flickcase.viewmodel.HomeViewModel
@@ -142,7 +143,7 @@ fun GenresScreen(
                                 modifier = Modifier.padding(top = 20.dp).size(25.dp)
                             )
                         }
-                        Spacer(Modifier.height(30.dp))
+                        Spacer(Modifier.height(bottomContentPadding))
                     }
                 }
             }

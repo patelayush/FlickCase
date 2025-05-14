@@ -34,6 +34,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.appsmith.flickcase.bottomContentPadding
 import org.appsmith.flickcase.components.SearchBar
 import org.appsmith.flickcase.components.MovieCard
 import org.appsmith.flickcase.network.MovieApiClient
@@ -136,7 +137,7 @@ fun SearchScreen(
                                 modifier = Modifier.padding(top = 15.dp).size(25.dp)
                             )
                         }
-                        Spacer(Modifier.height(30.dp))
+                        Spacer(Modifier.height(bottomContentPadding))
                     }
                 }
             } else if (homeViewModel.searchedContent.isEmpty() && searchQuery.isNotBlank() && !homeViewModel.isLoading.value) {

@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import org.appsmith.flickcase.APP_NAME
+import org.appsmith.flickcase.bottomContentPadding
 import org.appsmith.flickcase.components.MovieCard
 import org.appsmith.flickcase.components.RegionPicker
 import org.appsmith.flickcase.model.configuration.ConfigurationResponse
@@ -328,7 +329,7 @@ fun HomeScreenContent(
         }
 
         item {
-            Spacer(Modifier.height(30.dp))
+            Spacer(Modifier.height(bottomContentPadding))
         }
     }
 }

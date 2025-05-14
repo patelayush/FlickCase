@@ -5,6 +5,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,15 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil3.ImageLoader
-import coil3.PlatformContext
 import coil3.compose.setSingletonImageLoaderFactory
-import coil3.memory.MemoryCache
-import coil3.request.CachePolicy
-import coil3.request.crossfade
-import coil3.util.DebugLogger
 import kotlinx.coroutines.launch
 import org.appsmith.flickcase.components.BottomNavigationBar
 import org.appsmith.flickcase.components.MovieDetailSheet
@@ -64,7 +61,10 @@ fun App(
 
         Scaffold(
             modifier = Modifier
-                .blur(if (homeViewModel.openMovieDetailSheet.value || homeViewModel.showRegionSelector.value) 4.dp else 0.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+                .blur(
+                    if (homeViewModel.openMovieDetailSheet.value || homeViewModel.showRegionSelector.value) 4.dp else 0.dp,
+                    edgeTreatment = BlurredEdgeTreatment.Unbounded
+                )
                 .animateContentSize(tween())
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
@@ -107,7 +107,12 @@ fun App(
             }
         ) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(it),
+                modifier = Modifier.fillMaxSize().padding(
+                    top = it.calculateTopPadding(),
+                    start = it.calculateStartPadding(LayoutDirection.Ltr),
+                    end = it.calculateEndPadding(LayoutDirection.Ltr),
+                    bottom = it.calculateBottomPadding() - 10.dp
+                ),
                 contentAlignment = Alignment.Center
             ) {
                 when (homeViewModel.currentScreen.value) {

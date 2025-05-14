@@ -5,22 +5,22 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000278">
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000265">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: wasmJsBrowserDistribution" time="152.688464">
+      <testcase classname="fastlane.lanes" name="1: wasmJsBrowserDistribution" time="168.068121">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: Switch to android copy lane" time="0.001999">
+      <testcase classname="fastlane.lanes" name="2: Switch to android copy lane" time="0.002343">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="3: :composeApp:wasmJsBrowserDevelopmentRun --exclude-task wasmJsBrowserTest" time="92541.213866">
+      <testcase classname="fastlane.lanes" name="3: :composeApp:wasmJsBrowserDevelopmentRun --exclude-task wasmJsBrowserTest" time="263691.273698">
         
       </testcase>
     
