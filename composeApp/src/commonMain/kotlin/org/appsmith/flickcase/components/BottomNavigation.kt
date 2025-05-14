@@ -60,7 +60,7 @@ fun BottomNavigationBar(
                 shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
             )
             .height(
-                60.dp + AppBarDefaults.bottomAppBarWindowInsets.asPaddingValues()
+                70.dp + AppBarDefaults.bottomAppBarWindowInsets.asPaddingValues()
                     .calculateBottomPadding()
             ),
         containerColor = Color.Transparent,
