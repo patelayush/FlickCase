@@ -111,7 +111,7 @@ fun App(
                     top = it.calculateTopPadding(),
                     start = it.calculateStartPadding(LayoutDirection.Ltr),
                     end = it.calculateEndPadding(LayoutDirection.Ltr),
-                    bottom = it.calculateBottomPadding() - 10.dp
+                    bottom = it.calculateBottomPadding().takeIf { it > 10.dp }?.let { it - 10.dp } ?: it.calculateBottomPadding()
                 ),
                 contentAlignment = Alignment.Center
             ) {
