@@ -27,6 +27,7 @@ platform :android do
     dest = '/Users/patel/Documents/Github/FlickCase/docs'
     src = '/Users/patel/Documents/Github/FlickCase/composeApp/build/dist/wasmJs/productionExecutable'
     srcPolicy = '/Users/patel/Documents/Github/FlickCase/PrivacyPolicy.html'
+    srcSupport = '/Users/patel/Documents/Github/FlickCase/support.html'
 
     # Ensure destination directory exists
     FileUtils.mkdir_p(dest)
@@ -37,6 +38,7 @@ platform :android do
     # Copy all files from source to destination
     FileUtils.cp_r(Dir["#{src}/*"], dest)
     FileUtils.cp_r(Dir["#{srcPolicy}"], dest)
+    FileUtils.cp_r(Dir["#{srcSupport}"], dest)
 
     UI.success("Files copied from #{src} to #{dest}")
   end
