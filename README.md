@@ -8,6 +8,11 @@
 **FlickCase** is a sleek and intuitive application built with **Compose Multiplatform** that allows you to discover new movies and TV shows, explore by genre, and find detailed information about your favorites. Enjoy a consistent experience across various devices, powered by the vast data of the TMDb API. 
 *<br>Note - This is still under Development.*
 
+**Download FlickCase today:**
+* [**Google Play Store**](https://play.google.com/store/apps/details?id=org.appsmith.flickcase)
+* [**Apple App Store:**](https://apps.apple.com/us/app/flickcase/id6745903913)
+* [**Web Link**](https://patelayush.github.io/FlickCase/)
+
 ## Features
 
 * **Trending Content:** Discover the most popular and currently trending movies and TV shows.
